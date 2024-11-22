@@ -4,16 +4,28 @@ import (
 	"auth-service/pkg/util"
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/go-redis/redis/v8"
 )
+
+func getRedisPassword() string {
+	if os.Getenv("RAILWAY_ENVIRONMENT_NAME") == "production" {
+		return os.Getenv("REDIS_PASSWORD")
+	}
+	return ""
+}
 
 func NewRedisClient() (*redis.Client, error) {
 	env := util.GetConfig(".")
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%s", env.RedisHost, env.RedisPort),
+		Addr:     fmt.Sprintf("%s:%s", env.RedisHost, env.RedisPort),
+		Password: getRedisPassword(),
 	})
+
+	if os.Getenv("RAILWAY_ENVIRONMENT_NAME") == "production" {
+	}
 
 	_, err := rdb.Ping(context.Background()).Result()
 	if err != nil {

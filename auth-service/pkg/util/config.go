@@ -9,10 +9,10 @@ import (
 )
 
 type Config struct {
-	DBSource  string
-	MasterKey string
-	RedisPort string
-	RedisHost string
+	DBSource  string `mapstructure:"DB_SOURCE"`
+	MasterKey string `mapstructure:"MASTER_KEY"`
+	RedisPort string `mapstructure:"REDIS_PORT"`
+	RedisHost string `mapstructure:"REDIS_HOST"`
 }
 
 var (
@@ -30,7 +30,7 @@ func GetConfig(path string) *Config {
 				RedisHost: os.Getenv("REDIS_HOST"),
 			}
 		} else {
-			viper.AddConfigPath(".")
+			viper.AddConfigPath(path)
 			viper.SetConfigName(".env")
 			viper.SetConfigType("env")
 			viper.AutomaticEnv()
@@ -44,10 +44,6 @@ func GetConfig(path string) *Config {
 			if err != nil {
 				log.Fatalf("Error unmarshalling configuration: %v", err)
 			}
-		}
-
-		if config.DBSource == "" || config.MasterKey == "" || config.RedisPort == "" || config.RedisHost == "" {
-			log.Fatalf("Missing required configuration values")
 		}
 	})
 
