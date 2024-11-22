@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS "company";
+
+DROP EXTENSION IF EXISTS "uuid-ossp";

@@ -1,0 +1,182 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  elasticsearch_1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: elasticsearch_1
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms4g -Xmx4g
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=your-elastic-password
+      - xpack.security.enabled=true
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -u elastic:your-elastic-password http://localhost:9200 >/dev/null || exit 1",
+        ]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  elasticsearch_2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: elasticsearch_2
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms4g -Xmx4g
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=your-elastic-password
+      - xpack.security.enabled=true
+    volumes:
+      - es_data_replica:/usr/share/elasticsearch/data
+    networks:
+      - app-network
+    ports:
+      - "9201:9200"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -u elastic:your-elastic-password http://localhost:9201 >/dev/null || exit 1",
+        ]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+    command:
+      - "--config.file=/etc/postgres_exporter/postgres_exporter.yml"
+    volumes:
+      - ./postgres_exporter/postgres_exporter.yml:/etc/postgres_exporter/postgres_exporter.yml
+    ports:
+      - "9187:9187"
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+
+  elasticsearch_exporter:
+    image: quay.io/prometheuscommunity/elasticsearch-exporter:latest
+    container_name: elasticsearch_exporter
+    command:
+      - "--es.uri=http://elasticsearch_1:9200"
+      - "--es.ssl-skip-verify"
+      - "--es.all"
+      - "--es.indices"
+      - "--es.timeout=30s"
+    environment:
+      - "ES_USERNAME=elastic"
+      - "ES_PASSWORD=your-elastic-password"
+    ports:
+      - "9114:9114"
+    networks:
+      - app-network
+    depends_on:
+      - elasticsearch_1
+    restart: on-failure
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://localhost:9114/metrics || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis_exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis_exporter
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+    ports:
+      - "9121:9121"
+    networks:
+      - app-network
+    depends_on:
+      - redis
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - app-network
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3010:3010"
+    networks:
+      - app-network
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command: redis-server --save 20 1 --loglevel warning --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  es_data:
+    driver: local
+  es_data_replica:
+    driver: local
+  postgres_data:
+    driver: local
+  grafana_data:
+    driver: local
+  redis_data:
+    driver: local
