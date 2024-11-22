@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -15,7 +14,6 @@ import (
 	"auth-service/internal/infra/cache"
 	"auth-service/internal/infra/database"
 	"auth-service/internal/infra/repository"
-	"auth-service/internal/infra/search"
 )
 
 func initDB() (*pgxpool.Pool, error) {
@@ -32,14 +30,6 @@ func initRedis() (*redis.Client, error) {
 		return nil, err
 	}
 	return rdb, nil
-}
-
-func initElasticsearch() (*elasticsearch.Client, error) {
-	es, err := search.NewElasticsearchClient()
-	if err != nil {
-		return nil, err
-	}
-	return es, nil
 }
 
 func initServer(companyHandler *handlers.CompanyHandler) *fiber.App {
@@ -73,17 +63,12 @@ func main() {
 	}
 	defer db.Close()
 
-	es, err := initElasticsearch()
-	if err != nil {
-		log.Fatalf("Failed to connect to Elasticsearch: %v", err)
-	}
-
 	rdb, err := initRedis()
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
 
-	companyRepo := repository.NewCompanyRepository(db, es, rdb)
+	companyRepo := repository.NewCompanyRepository(db, rdb)
 
 	companyHandler := handlers.NewCompanyHandler(companyRepo)
 

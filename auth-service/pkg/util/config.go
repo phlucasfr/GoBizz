@@ -8,13 +8,10 @@ import (
 )
 
 type Config struct {
-	EsHost     string `mapstructure:"ES_HOST"`
-	DBSource   string `mapstructure:"DB_SOURCE"`
-	MasterKey  string `mapstructure:"MASTER_KEY"`
-	RedisPort  string `mapstructure:"REDIS_PORT"`
-	RedisHost  string `mapstructure:"REDIS_HOST"`
-	EsUsername string `mapstructure:"ES_USERNAME"`
-	EsPassword string `mapstructure:"ES_PASSWORD"`
+	DBSource  string `mapstructure:"DB_SOURCE"`
+	MasterKey string `mapstructure:"MASTER_KEY"`
+	RedisPort string `mapstructure:"REDIS_PORT"`
+	RedisHost string `mapstructure:"REDIS_HOST"`
 }
 
 var (

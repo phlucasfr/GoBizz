@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,7 +9,6 @@ import (
 	"auth-service/internal/domain"
 	"auth-service/pkg/util"
 
-	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -19,48 +17,16 @@ import (
 
 type CompanyRepository struct {
 	db      *pgxpool.Pool
-	es      *elasticsearch.Client
 	redis   *redis.Client
 	queries *Queries
 }
 
-func NewCompanyRepository(db *pgxpool.Pool, es *elasticsearch.Client, redis *redis.Client) *CompanyRepository {
+func NewCompanyRepository(db *pgxpool.Pool, redis *redis.Client) *CompanyRepository {
 	return &CompanyRepository{
 		db:      db,
-		es:      es,
 		redis:   redis,
 		queries: New(db),
 	}
-}
-
-func (r *CompanyRepository) indexCompany(ctx context.Context, company Company) error {
-	companyUUID, err := uuid.FromBytes(company.ID.Bytes[:])
-	if err != nil {
-		return fmt.Errorf("erro ao converter ID para UUID: %v", err)
-	}
-
-	data, err := json.Marshal(company)
-	if err != nil {
-		return fmt.Errorf("erro ao serializar documento: %v", err)
-	}
-
-	res, err := r.es.Index(
-		"companies",
-		bytes.NewReader(data),
-		r.es.Index.WithDocumentID(companyUUID.String()),
-		r.es.Index.WithContext(ctx),
-		r.es.Index.WithRefresh("true"),
-	)
-	if err != nil {
-		return fmt.Errorf("erro ao indexar no elasticsearch: %v", err)
-	}
-	defer res.Body.Close()
-
-	if res.IsError() {
-		return fmt.Errorf("erro na resposta do elasticsearch: %s", res.String())
-	}
-
-	return nil
 }
 
 func (r *CompanyRepository) Create(ctx context.Context, req domain.CreateCompanyRequest) (*domain.CreateCompanyResponse, error) {
@@ -85,11 +51,6 @@ func (r *CompanyRepository) Create(ctx context.Context, req domain.CreateCompany
 	}
 
 	company, err := r.queries.CreateCompany(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.indexCompany(ctx, company)
 	if err != nil {
 		return nil, err
 	}
