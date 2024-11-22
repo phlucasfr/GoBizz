@@ -5,7 +5,7 @@ COPY . .
 
 RUN go mod tidy
 
-RUN go build -o main .
+RUN go build -o main ./cmd
 
 FROM gcr.io/distroless/base-debian11
 
