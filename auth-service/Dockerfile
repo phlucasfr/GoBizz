@@ -5,10 +5,6 @@ COPY . .
 
 RUN go mod tidy
 
-RUN make sqlc
-
-RUN make migrateup
-
 RUN go build -o main .
 
 FROM gcr.io/distroless/base-debian11
