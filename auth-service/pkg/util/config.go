@@ -2,16 +2,17 @@ package util
 
 import (
 	"log"
+	"os"
 	"sync"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	DBSource  string `mapstructure:"DB_SOURCE"`
-	MasterKey string `mapstructure:"MASTER_KEY"`
-	RedisPort string `mapstructure:"REDIS_PORT"`
-	RedisHost string `mapstructure:"REDIS_HOST"`
+	DBSource  string
+	MasterKey string
+	RedisPort string
+	RedisHost string
 }
 
 var (
@@ -19,29 +20,36 @@ var (
 	configOnce sync.Once
 )
 
-func GetConfig(path string) *Config {
+func GetConfig() *Config {
 	configOnce.Do(func() {
+		if os.Getenv("RAILWAY_ENVIRONMENT_NAME") == "production" {
+			config = Config{
+				DBSource:  os.Getenv("DB_SOURCE"),
+				MasterKey: os.Getenv("MASTER_KEY"),
+				RedisPort: os.Getenv("REDIS_PORT"),
+				RedisHost: os.Getenv("REDIS_HOST"),
+			}
+		} else {
+			viper.AddConfigPath(".")
+			viper.SetConfigName(".env")
+			viper.SetConfigType("env")
+			viper.AutomaticEnv()
 
-		// Just to dev env.
-		// viper.AddConfigPath(path)
-		// viper.SetConfigName(".env")
-		// viper.SetConfigType("env")
-		// viper.AutomaticEnv()
+			err := viper.ReadInConfig()
+			if err != nil {
+				log.Fatalf("Error loading configuration: %v", err)
+			}
 
-		viper.BindEnv("DBSource")
-		viper.BindEnv("MasterKey")
-		viper.BindEnv("RedisPort")
-		viper.BindEnv("RedisHost")
-
-		err := viper.ReadInConfig()
-		if err != nil {
-			log.Fatalf("Error loading configuration: %v", err)
+			err = viper.Unmarshal(&config)
+			if err != nil {
+				log.Fatalf("Error unmarshalling configuration: %v", err)
+			}
 		}
 
-		err = viper.Unmarshal(&config)
-		if err != nil {
-			log.Fatalf("Error unmarshalling configuration: %v", err)
+		if config.DBSource == "" || config.MasterKey == "" || config.RedisPort == "" || config.RedisHost == "" {
+			log.Fatalf("Missing required configuration values")
 		}
 	})
+
 	return &config
 }
