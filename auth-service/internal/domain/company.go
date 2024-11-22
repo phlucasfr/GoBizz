@@ -15,6 +15,11 @@ type CreateCompanyResponse struct {
 	Name string    `json:"name"`
 }
 
+type VerifyCompanyBySmsRequest struct {
+	ID   uuid.UUID `json:"id" validate:"required"`
+	Code string    `json:"code" validate:"required,min=6"`
+}
+
 type UpdateCompanyRequest struct {
 	Name     *string `json:"name"`
 	Email    *string `json:"email"`

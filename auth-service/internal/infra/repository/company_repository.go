@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -30,16 +31,30 @@ func NewCompanyRepository(db *pgxpool.Pool, redis *redis.Client) *CompanyReposit
 }
 
 func (r *CompanyRepository) Create(ctx context.Context, req domain.CreateCompanyRequest) (*domain.CreateCompanyResponse, error) {
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("erro ao iniciar a transação: %w", err)
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback(ctx)
+			panic(p)
+		} else if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			err = tx.Commit(ctx)
+		}
+	}()
+
 	hashedPassword, err := util.HashPassword(req.Password)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("erro ao hashear a senha: %w", err)
 	}
 
 	env := util.GetConfig(".")
-
 	safeCpfCnpj, err := util.Encrypt(req.CPFCNPJ, env.MasterKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("erro ao criptografar CPF/CNPJ: %w", err)
 	}
 
 	params := CreateCompanyParams{
@@ -50,15 +65,42 @@ func (r *CompanyRepository) Create(ctx context.Context, req domain.CreateCompany
 		HashedPassword: string(hashedPassword),
 	}
 
-	company, err := r.queries.CreateCompany(ctx, params)
+	company, err := r.queries.WithTx(tx).CreateCompany(ctx, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("erro ao criar a empresa no banco de dados: %w", err)
+	}
+
+	err = util.SendVerificationSms(&company.Phone)
+	if err != nil {
+		return nil, fmt.Errorf("erro ao enviar SMS de verificação: %w", err)
 	}
 
 	return &domain.CreateCompanyResponse{
 		ID:   company.ID.Bytes,
 		Name: company.Name,
 	}, nil
+}
+
+func (r *CompanyRepository) VerifyCompanyBySms(ctx context.Context, req *domain.VerifyCompanyBySmsRequest) (bool, error) {
+	company, err := r.GetByID(ctx, req.ID)
+	if err != nil {
+		return false, err
+	}
+
+	verified, err := util.CheckVerificationCode(&company.Phone, &req.Code)
+	if err != nil {
+		return false, err
+	}
+
+	if verified {
+		_, err = r.queries.ActivateCompany(ctx, company.ID)
+
+		if err != nil {
+			return false, err
+		}
+	}
+
+	return verified, nil
 }
 
 func (r *CompanyRepository) GetByID(ctx context.Context, id uuid.UUID) (*Company, error) {

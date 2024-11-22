@@ -51,6 +51,7 @@ func initServer(companyHandler *handlers.CompanyHandler) *fiber.App {
 
 	v1 := app.Group("/v1")
 	v1.Post("/companies", companyHandler.Create)
+	v1.Post("/companies/sms/verify", companyHandler.VerifyCompanyBySms)
 	v1.Get("/companies/:id", companyHandler.GetByID)
 
 	return app

@@ -21,5 +21,13 @@ SET
 WHERE id = $1
 RETURNING *;
 
+-- name: ActivateCompany :one
+UPDATE company 
+SET 
+    is_active = true,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+
 -- name: DeleteCompany :exec
 DELETE FROM company WHERE id = $1;

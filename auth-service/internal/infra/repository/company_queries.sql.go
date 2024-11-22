@@ -11,6 +11,32 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const activateCompany = `-- name: ActivateCompany :one
+UPDATE company 
+SET 
+    is_active = true,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, name, email, phone, cpf_cnpj, is_active, updated_at, created_at, hashed_password
+`
+
+func (q *Queries) ActivateCompany(ctx context.Context, id pgtype.UUID) (Company, error) {
+	row := q.db.QueryRow(ctx, activateCompany, id)
+	var i Company
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Phone,
+		&i.CpfCnpj,
+		&i.IsActive,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.HashedPassword,
+	)
+	return i, err
+}
+
 const createCompany = `-- name: CreateCompany :one
 INSERT INTO company (name, email, phone, cpf_cnpj, is_active, hashed_password)
 VALUES ($1, $2, $3, $4, $5, $6)

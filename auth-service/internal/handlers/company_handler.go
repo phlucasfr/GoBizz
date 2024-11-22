@@ -51,3 +51,21 @@ func (h *CompanyHandler) GetByID(c *fiber.Ctx) error {
 
 	return c.JSON(company)
 }
+
+func (h *CompanyHandler) VerifyCompanyBySms(c *fiber.Ctx) error {
+	var req domain.VerifyCompanyBySmsRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request payload",
+		})
+	}
+
+	company, err := h.repo.VerifyCompanyBySms(c.Context(), &req)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(company)
+}
