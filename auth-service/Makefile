@@ -1,8 +1,8 @@
 migrateup:
-	migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -verbose up;      
+	migrate -path migrations -database "your-pg-conn-string" -verbose up;      
 
 migratedown:
-	migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -verbose down;
+	migrate -path migrations -database "your-pg-conn-string" -verbose down;
 
 sqlc:
 	sqlc generate

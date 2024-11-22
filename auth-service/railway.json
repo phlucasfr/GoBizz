@@ -1,0 +1,11 @@
+{
+    "builds": [
+      {
+        "src": "auth-service/Dockerfile",
+        "use": "@railway/docker",
+        "config": {
+          "context": "auth-service"
+        }
+      }
+    ]
+  }
