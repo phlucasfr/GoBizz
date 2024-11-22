@@ -1,15 +1,16 @@
-FROM golang:1.23.3 AS builder
+FROM golang:1.23.3-alpine AS builder
 
 WORKDIR /app
 COPY . .
 
 RUN go mod tidy
-
 RUN go build -o main ./cmd
 
-FROM gcr.io/distroless/base-debian11
+FROM alpine:latest
 
 WORKDIR /root/
+
+RUN apk add --no-cache libc6-compat
 
 COPY --from=builder /app/main .
 
