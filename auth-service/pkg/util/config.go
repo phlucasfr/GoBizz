@@ -20,7 +20,7 @@ var (
 	configOnce sync.Once
 )
 
-func GetConfig() *Config {
+func GetConfig(path string) *Config {
 	configOnce.Do(func() {
 		if os.Getenv("RAILWAY_ENVIRONMENT_NAME") == "production" {
 			config = Config{
