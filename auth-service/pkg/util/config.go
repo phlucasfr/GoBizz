@@ -23,15 +23,15 @@ func GetConfig(path string) *Config {
 	configOnce.Do(func() {
 
 		// Just to dev env.
-		viper.AddConfigPath(path)
-		viper.SetConfigName(".env")
-		viper.SetConfigType("env")
-		viper.AutomaticEnv()
+		// viper.AddConfigPath(path)
+		// viper.SetConfigName(".env")
+		// viper.SetConfigType("env")
+		// viper.AutomaticEnv()
 
-		// viper.BindEnv("DBSource")
-		// viper.BindEnv("MasterKey")
-		// viper.BindEnv("RedisPort")
-		// viper.BindEnv("RedisHost")
+		viper.BindEnv("DBSource")
+		viper.BindEnv("MasterKey")
+		viper.BindEnv("RedisPort")
+		viper.BindEnv("RedisHost")
 
 		err := viper.ReadInConfig()
 		if err != nil {
