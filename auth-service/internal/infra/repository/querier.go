@@ -13,8 +13,9 @@ import (
 type Querier interface {
 	ActivateCompany(ctx context.Context, id pgtype.UUID) (Company, error)
 	CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error)
-	DeleteCompany(ctx context.Context, id pgtype.UUID) error
+	DeleteCompany(ctx context.Context, id pgtype.UUID) (int64, error)
 	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
+	HasActiveCompany(ctx context.Context, arg HasActiveCompanyParams) (bool, error)
 	ListCompanies(ctx context.Context, arg ListCompaniesParams) ([]Company, error)
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)
 }

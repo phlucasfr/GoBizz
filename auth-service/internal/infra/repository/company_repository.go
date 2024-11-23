@@ -11,8 +11,6 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -31,43 +29,47 @@ func NewCompanyRepository(db *pgxpool.Pool, redis *redis.Client) *CompanyReposit
 }
 
 func (r *CompanyRepository) Create(ctx context.Context, req domain.CreateCompanyRequest) (*domain.CreateCompanyResponse, error) {
-	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
+	hasActiveCompany, err := r.queries.HasActiveCompany(ctx, HasActiveCompanyParams{
+		Email: req.Email,
+		Phone: req.Phone,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("erro ao iniciar a transação: %w", err)
+		return nil, fmt.Errorf("erro ao verificar dados da empresa: %v", err)
 	}
-	defer func() {
-		if p := recover(); p != nil {
-			tx.Rollback(ctx)
-			panic(p)
-		} else if err != nil {
-			tx.Rollback(ctx)
-		} else {
-			err = tx.Commit(ctx)
-		}
-	}()
+
+	if hasActiveCompany {
+		return nil, fmt.Errorf("já existe uma empresa ativa com os dados informados (email ou telefone)")
+	}
 
 	hashedPassword, err := util.HashPassword(req.Password)
 	if err != nil {
-		return nil, fmt.Errorf("erro ao hashear a senha: %w", err)
+		return nil, err
 	}
 
 	env := util.GetConfig(".")
-	safeCpfCnpj, err := util.Encrypt(req.CPFCNPJ, env.MasterKey)
+	encryptedCpfCnpf, err := util.Encrypt(req.CPFCNPJ, env.MasterKey)
 	if err != nil {
-		return nil, fmt.Errorf("erro ao criptografar CPF/CNPJ: %w", err)
+		return nil, err
 	}
-
-	params := CreateCompanyParams{
+	company := domain.Company{
+		ID:             uuid.New(),
 		Name:           req.Name,
 		Email:          req.Email,
 		Phone:          req.Phone,
-		CpfCnpj:        safeCpfCnpj,
-		HashedPassword: string(hashedPassword),
+		CpfCnpj:        encryptedCpfCnpf,
+		HashedPassword: hashedPassword,
 	}
 
-	company, err := r.queries.WithTx(tx).CreateCompany(ctx, params)
+	companyJSON, err := json.Marshal(company)
 	if err != nil {
-		return nil, fmt.Errorf("erro ao criar a empresa no banco de dados: %w", err)
+		return nil, fmt.Errorf("erro ao serializar os dados da empresa: %v", err)
+	}
+
+	cacheKey := fmt.Sprintf("company:%x", company.ID.String())
+
+	err = r.redis.Set(ctx, cacheKey, companyJSON, 24*time.Hour).Err()
+	if err != nil {
+		return nil, fmt.Errorf("erro ao armazenar empresa no cache Redis: %v", err)
 	}
 
 	err = util.SendVerificationSms(&company.Phone)
@@ -76,7 +78,7 @@ func (r *CompanyRepository) Create(ctx context.Context, req domain.CreateCompany
 	}
 
 	return &domain.CreateCompanyResponse{
-		ID:   company.ID.Bytes,
+		ID:   company.ID,
 		Name: company.Name,
 	}, nil
 }
@@ -93,22 +95,27 @@ func (r *CompanyRepository) VerifyCompanyBySms(ctx context.Context, req *domain.
 	}
 
 	if verified {
-		_, err = r.queries.ActivateCompany(ctx, company.ID)
-
+		err := r.persistCompanyInDB(ctx, company)
 		if err != nil {
 			return false, err
+		}
+
+		cacheKey := fmt.Sprintf("company:%x", company.ID.String())
+		err = r.redis.Del(ctx, cacheKey).Err()
+		if err != nil {
+			return false, fmt.Errorf("erro ao remover empresa do cache Redis após persistência: %v", err)
 		}
 	}
 
 	return verified, nil
 }
 
-func (r *CompanyRepository) GetByID(ctx context.Context, id uuid.UUID) (*Company, error) {
-	cacheKey := fmt.Sprintf("company:%s", id.String())
+func (r *CompanyRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Company, error) {
+	cacheKey := fmt.Sprintf("company:%x", id.String())
 	cachedCompany, err := r.redis.Get(ctx, cacheKey).Result()
 
 	if err == nil && cachedCompany != "" {
-		var company Company
+		var company domain.Company
 		err := json.Unmarshal([]byte(cachedCompany), &company)
 		if err != nil {
 			return nil, fmt.Errorf("erro ao desserializar dados do cache: %v", err)
@@ -116,34 +123,29 @@ func (r *CompanyRepository) GetByID(ctx context.Context, id uuid.UUID) (*Company
 		return &company, nil
 	}
 
-	pgUUID := pgtype.UUID{
-		Bytes: id,
-		Valid: true,
-	}
+	return nil, fmt.Errorf("empresa não encontrada no cache ou banco de dados")
+}
 
-	company, err := r.queries.GetCompanyByID(ctx, pgUUID)
-	if err != nil {
-		return nil, err
-	}
-
-	companyJSON, err := json.Marshal(company)
-	if err != nil {
-		return nil, fmt.Errorf("erro ao serializar dados da empresa: %v", err)
-	}
-
-	err = r.redis.Set(ctx, cacheKey, companyJSON, 2*time.Minute).Err()
-	if err != nil {
-		return nil, fmt.Errorf("erro ao armazenar no cache Redis: %v", err)
-	}
-
-	return &Company{
-		ID:             company.ID,
+func (r *CompanyRepository) persistCompanyInDB(ctx context.Context, company *domain.Company) error {
+	params := CreateCompanyParams{
 		Name:           company.Name,
 		Email:          company.Email,
 		Phone:          company.Phone,
 		CpfCnpj:        company.CpfCnpj,
+		IsActive:       true,
 		HashedPassword: company.HashedPassword,
-		CreatedAt:      company.CreatedAt,
-		UpdatedAt:      company.UpdatedAt,
-	}, nil
+	}
+
+	_, err := r.queries.CreateCompany(ctx, params)
+	if err != nil {
+		return fmt.Errorf("erro ao persistir empresa no banco de dados: %w", err)
+	}
+
+	cacheKey := fmt.Sprintf("company:%x", company.ID)
+	err = r.redis.Del(ctx, cacheKey).Err()
+	if err != nil {
+		return fmt.Errorf("erro ao remover empresa do cache Redis após persistência: %v", err)
+	}
+
+	return nil
 }

@@ -24,9 +24,7 @@ func SendVerificationSms(phone *string) error {
 		return fmt.Errorf("erro ao enviar o código de verificação: %w", err)
 	}
 
-	if resp.Sid != nil {
-		fmt.Printf("Código de verificação enviado com sucesso. SID: %s\n", *resp.Sid)
-	} else {
+	if resp.Sid == nil {
 		return fmt.Errorf("erro desconhecido ao enviar o código de verificação")
 	}
 

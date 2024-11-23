@@ -12,10 +12,10 @@ import (
 )
 
 const activateCompany = `-- name: ActivateCompany :one
-UPDATE company 
-SET 
-    is_active = true,
-    updated_at = NOW()
+UPDATE company
+SET
+  is_active = true,
+  updated_at = NOW()
 WHERE id = $1
 RETURNING id, name, email, phone, cpf_cnpj, is_active, updated_at, created_at, hashed_password
 `
@@ -76,13 +76,16 @@ func (q *Queries) CreateCompany(ctx context.Context, arg CreateCompanyParams) (C
 	return i, err
 }
 
-const deleteCompany = `-- name: DeleteCompany :exec
+const deleteCompany = `-- name: DeleteCompany :execrows
 DELETE FROM company WHERE id = $1
 `
 
-func (q *Queries) DeleteCompany(ctx context.Context, id pgtype.UUID) error {
-	_, err := q.db.Exec(ctx, deleteCompany, id)
-	return err
+func (q *Queries) DeleteCompany(ctx context.Context, id pgtype.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteCompany, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const getCompanyByID = `-- name: GetCompanyByID :one
@@ -104,6 +107,24 @@ func (q *Queries) GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, 
 		&i.HashedPassword,
 	)
 	return i, err
+}
+
+const hasActiveCompany = `-- name: HasActiveCompany :one
+SELECT EXISTS (
+  SELECT 1 FROM company WHERE (email = $1 OR phone = $2) AND is_active = true
+)
+`
+
+type HasActiveCompanyParams struct {
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+}
+
+func (q *Queries) HasActiveCompany(ctx context.Context, arg HasActiveCompanyParams) (bool, error) {
+	row := q.db.QueryRow(ctx, hasActiveCompany, arg.Email, arg.Phone)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const listCompanies = `-- name: ListCompanies :many
@@ -146,14 +167,14 @@ func (q *Queries) ListCompanies(ctx context.Context, arg ListCompaniesParams) ([
 }
 
 const updateCompany = `-- name: UpdateCompany :one
-UPDATE company 
-SET 
-    name = COALESCE($2, name),
-    email = COALESCE($3, email),
-    phone = COALESCE($4, phone),
-    cpf_cnpj = COALESCE($5, cpf_cnpj),
-    is_active = COALESCE($6, is_active),
-    updated_at = NOW()
+UPDATE company
+SET
+  name = COALESCE($2, name),
+  email = COALESCE($3, email),
+  phone = COALESCE($4, phone),
+  cpf_cnpj = COALESCE($5, cpf_cnpj),
+  is_active = COALESCE($6, is_active),
+  updated_at = NOW()
 WHERE id = $1
 RETURNING id, name, email, phone, cpf_cnpj, is_active, updated_at, created_at, hashed_password
 `

@@ -1,6 +1,9 @@
 package domain
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type CreateCompanyRequest struct {
 	Name     string `json:"name" validate:"required"`
@@ -26,4 +29,16 @@ type UpdateCompanyRequest struct {
 	Phone    *string `json:"phone"`
 	CPFCNPJ  *string `json:"cpf_cnpj"`
 	IsActive *bool   `json:"is_active"`
+}
+
+type Company struct {
+	ID             uuid.UUID          `json:"id"`
+	Name           string             `json:"name"`
+	Email          string             `json:"email"`
+	Phone          string             `json:"phone"`
+	CpfCnpj        string             `json:"cpf_cnpj"`
+	IsActive       bool               `json:"is_active"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	HashedPassword string             `json:"hashed_password"`
 }
