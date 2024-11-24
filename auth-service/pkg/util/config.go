@@ -36,6 +36,10 @@ func GetConfig(path string) *Config {
 				TwilioVerificationService: os.Getenv("TWILIO_VERIFICATION_SERVICE"),
 			}
 		} else {
+			if IsTesting() {
+				path = "../../"
+			}
+
 			viper.AddConfigPath(path)
 			viper.SetConfigName(".env")
 			viper.SetConfigType("env")

@@ -8,6 +8,9 @@ import (
 )
 
 func SendVerificationSms(phone *string) error {
+	if IsTesting() {
+		return nil
+	}
 	env := GetConfig(".")
 
 	client := twilio.NewRestClientWithParams(twilio.ClientParams{
@@ -32,6 +35,10 @@ func SendVerificationSms(phone *string) error {
 }
 
 func CheckVerificationCode(phone *string, code *string) (bool, error) {
+	if IsTesting() {
+		return true, nil
+	}
+
 	env := GetConfig(".")
 
 	client := twilio.NewRestClientWithParams(twilio.ClientParams{
