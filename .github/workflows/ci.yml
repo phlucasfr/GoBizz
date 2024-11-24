@@ -44,5 +44,5 @@ jobs:
       working-directory: ./auth-service
 
     - name: Test
-      run: make tests
+      run: make testsci
       working-directory: ./auth-service

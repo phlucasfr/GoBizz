@@ -10,7 +10,10 @@ sqlc:
 tests:
 	TEST_ENV=true go test -v -cover ./... 
 
+testsci:
+	go test -v -cover ./... 
+
 server:
 	go run cmd/main.go
 
-.PHONY: migrateup, migratedown, sqlc, tests, server
+.PHONY: migrateup, migratedown, sqlc, tests, testsci, server
