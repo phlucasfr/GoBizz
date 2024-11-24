@@ -2,13 +2,14 @@ package util
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/twilio/twilio-go"
 	verify "github.com/twilio/twilio-go/rest/verify/v2"
 )
 
 func SendVerificationSms(phone *string) error {
-	if IsTesting() {
+	if IsTesting() || os.Getenv("CI_ENV") == "true" {
 		return nil
 	}
 	env := GetConfig(".")
@@ -35,7 +36,7 @@ func SendVerificationSms(phone *string) error {
 }
 
 func CheckVerificationCode(phone *string, code *string) (bool, error) {
-	if IsTesting() {
+	if IsTesting() || os.Getenv("CI_ENV") == "true" {
 		return true, nil
 	}
 
