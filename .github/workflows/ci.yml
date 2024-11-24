@@ -25,6 +25,17 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      # Adicione suas secrets aqui
+      RAILWAY_ENVIRONMENT_NAME: ${{ secrets.RAILWAY_ENVIRONMENT_NAME }}
+      DB_SOURCE: ${{ secrets.DB_SOURCE }}
+      MASTER_KEY: ${{ secrets.MASTER_KEY }}
+      REDIS_PORT: ${{ secrets.REDIS_PORT }}
+      REDIS_HOST: ${{ secrets.REDIS_HOST }}
+      TWILIO_USERNAME: ${{ secrets.TWILIO_USERNAME }}
+      TWILIO_PASSWORD: ${{ secrets.TWILIO_PASSWORD }}
+      TWILIO_VERIFICATION_SERVICE: ${{ secrets.TWILIO_VERIFICATION_SERVICE }}
+
     steps:
     - uses: actions/checkout@v3
 
