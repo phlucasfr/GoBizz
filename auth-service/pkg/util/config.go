@@ -25,7 +25,7 @@ var (
 
 func GetConfig(path string) *Config {
 	configOnce.Do(func() {
-		if os.Getenv("RAILWAY_ENVIRONMENT_NAME") == "production" {
+		if os.Getenv("RAILWAY_ENVIRONMENT_NAME") == "production" || IsTesting() || os.Getenv("CI_ENV") == "true" {
 			config = Config{
 				DBSource:                  os.Getenv("DB_SOURCE"),
 				MasterKey:                 os.Getenv("MASTER_KEY"),
