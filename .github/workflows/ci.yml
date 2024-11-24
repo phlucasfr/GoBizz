@@ -26,8 +26,7 @@ jobs:
           --health-retries 5
 
     env:
-      # Adicione suas secrets aqui
-      RAILWAY_ENVIRONMENT_NAME: ${{ secrets.RAILWAY_ENVIRONMENT_NAME }}
+      CI_ENV: ${{ secrets.CI_ENV }}
       DB_SOURCE: ${{ secrets.DB_SOURCE }}
       MASTER_KEY: ${{ secrets.MASTER_KEY }}
       REDIS_PORT: ${{ secrets.REDIS_PORT }}
