@@ -40,6 +40,7 @@ func GetConfig(path string) *Config {
 				path = "../../"
 			}
 
+			log.Println("istesting", IsTesting())
 			viper.AddConfigPath(path)
 			viper.SetConfigName(".env")
 			viper.SetConfigType("env")
