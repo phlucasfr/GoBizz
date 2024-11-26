@@ -7,8 +7,6 @@ interface VerificationModalProps {
 }
 
 const SmsVerificationModal = (props: VerificationModalProps) => {
-  console.log("Renderizando modal", props.isVisible);
-
   const [code, setCode] = createSignal("");
   const [error, setError] = createSignal("");
   const [isSubmitting, setIsSubmitting] = createSignal(false);
@@ -53,7 +51,6 @@ const SmsVerificationModal = (props: VerificationModalProps) => {
         throw new Error(data.message || "Falha ao verificar o código.");
       }
 
-      console.log("Código verificado com sucesso!");
       props.onClose();
     } catch (err: any) {
       setError(err.message || "Erro inesperado. Tente novamente.");

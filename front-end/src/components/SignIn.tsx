@@ -32,10 +32,6 @@ const SignIn = () => {
     }
 
     setError("");
-    console.log("Dados enviados:", {
-      email,
-      password,
-    });
   };
 
   return (
