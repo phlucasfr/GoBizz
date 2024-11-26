@@ -1,5 +1,5 @@
 export const apiConfig = {
-  baseUrl: import.meta.env.VITE_AUTH_SERVICE_API
+  baseUrl: import.meta.env.AUTH_SERVICE_API
   ,
   endpoints: {
     company: "/v1/companies",
