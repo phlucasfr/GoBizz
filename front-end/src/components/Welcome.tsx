@@ -2,21 +2,21 @@ import SignUp from "./SignUp";
 
 const Welcome = () => {
   return (
-    <div class="flex h-[84vh] overflow-hidden rounded-lg">
-      <div class="md:flex md:w-2/3 lg:w-3/4 rounded-lg text-white items-center justify-center">
-        <div class="hidden  md:block text-center max-w-xl">
-          <h1 class="text-4xl font-bold mb-6 text-black">
+    <div class="flex flex-col md:flex-row h-screen">
+      <div class="flex flex-col items-center justify-center w-full md:w-2/3 p-6 bg-gray-100">
+        <div class="text-center max-w-xl">
+          <h1 class="text-2xl md:text-4xl font-bold mb-6 text-black">
             Bem-vindo à Nossa Plataforma
           </h1>
-          <p class="text-xl text-black">
+          <p class="text-base md:text-xl text-black">
             Transforme sua gestão empresarial com ferramentas inteligentes e
             recursos completos.
           </p>
         </div>
+      </div>
 
-        <div class="absolute top-0 right-0 bottom-0 w-full md:w-1/3 lg:w-1/4 flex items-center justify-center p-6">
-          <SignUp />
-        </div>
+      <div class="w-full md:w-1/3 flex items-center justify-center p-6 overflow-auto">
+        <SignUp />
       </div>
     </div>
   );

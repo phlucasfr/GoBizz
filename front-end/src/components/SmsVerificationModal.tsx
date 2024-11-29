@@ -43,20 +43,28 @@ const SmsVerificationModal = (props: VerificationModalProps) => {
             id,
             code: code(),
           }),
+          credentials: "include",
         }
       );
 
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || "Falha ao verificar o código.");
+      } else {
+        props.onClose();
       }
-
-      props.onClose();
     } catch (err: any) {
       setError(err.message || "Erro inesperado. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleClose = () => {
+    setCode("");
+    setError("");
+    setIsSubmitting(false);
+    props.onClose();
   };
 
   return (
@@ -99,7 +107,7 @@ const SmsVerificationModal = (props: VerificationModalProps) => {
           </form>
 
           <button
-            onClick={props.onClose}
+            onClick={handleClose}
             class="w-full text-sm text-gray-600 hover:text-gray-800 focus:outline-none"
           >
             Cancelar

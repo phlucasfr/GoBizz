@@ -2,42 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-@viewport {
-  min-width: 320px;
-  width: device-width;
-}
-
 :root {
-  min-width: 320px !important;
-  width: 100vw !important;
+  width: 100%;
 }
 
 html {
-  min-width: 320px !important;
-  width: 100vw !important;
-  overflow-x: hidden !important;
+  overflow-x: hidden;
 }
 
-body {
-  min-width: 320px !important;
-  width: 100vw !important;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  position: relative;
-  overflow-x: hidden !important;
-}
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
 
-#root,
-#__next,
-main,
-.app {
-  min-width: 320px !important;
-  width: 100vw !important;
-  overflow-x: hidden !important;
-}
-
-* {
-  box-sizing: border-box;
-  min-width: min-content !important;
+  * {
+    min-width: initial;
+  }
 }
