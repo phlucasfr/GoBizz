@@ -9,11 +9,15 @@ import (
 )
 
 type CompanyHandler struct {
-	repo *repository.CompanyRepository
+	repo        *repository.CompanyRepository
+	sessionRepo *repository.SessionRepository
 }
 
-func NewCompanyHandler(repo *repository.CompanyRepository) *CompanyHandler {
-	return &CompanyHandler{repo: repo}
+func NewCompanyHandler(repo *repository.CompanyRepository, sessionRepo *repository.SessionRepository) *CompanyHandler {
+	return &CompanyHandler{
+		repo:        repo,
+		sessionRepo: sessionRepo,
+	}
 }
 
 func (h *CompanyHandler) Create(c *fiber.Ctx) error {
@@ -60,12 +64,22 @@ func (h *CompanyHandler) VerifyCompanyBySms(c *fiber.Ctx) error {
 		})
 	}
 
-	company, err := h.repo.VerifyCompanyBySms(c.Context(), &req)
+	err := h.repo.VerifyCompanyBySms(c.Context(), &req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(company)
+	sessionHandler := NewSessionHandler(h.sessionRepo)
+	err = sessionHandler.CreateSession(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "Verification successful",
+	})
 }

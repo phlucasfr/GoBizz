@@ -24,9 +24,6 @@ func NewRedisClient() (*redis.Client, error) {
 		Password: getRedisPassword(),
 	})
 
-	if os.Getenv("RAILWAY_ENVIRONMENT_NAME") == "production" {
-	}
-
 	_, err := rdb.Ping(context.Background()).Result()
 	if err != nil {
 		return nil, fmt.Errorf("erro ao conectar ao Redis: %v", err)

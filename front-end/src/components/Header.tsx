@@ -1,166 +1,175 @@
-import type { JSX } from "solid-js";
-import { createSignal } from "solid-js";
+import { Motion } from "@motionone/solid";
+import { isLoggedIn } from "../App";
+import { createSignal, createMemo, For } from "solid-js";
 
-type SectionKey = "home" | "about" | "contact";
+type SectionKey = "home" | "about" | "contact" | "profile" | "logout";
 type Section = {
-  title: string;
-  icon: () => JSX.Element;
+  id: SectionKey;
   href: string;
+  icon: string;
+  title: string;
 };
 
 const Header = () => {
-  const sections: Record<SectionKey, Section> = {
-    home: {
-      title: "Home",
-      icon: () => (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          class="w-5 h-5"
-        >
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 2L2 7h3v8h2V9h6v6h2V7h3L12 2z"
-          />
-        </svg>
-      ),
-      href: "/",
-    },
-    about: {
-      title: "Sobre Nós",
-      icon: () => (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          class="w-5 h-5"
-        >
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v7l3-3h3a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1V9a1 1 0 011-1h3l3 3V4"
-          />
-        </svg>
-      ),
-      href: "/about",
-    },
-    contact: {
-      title: "Contato",
-      icon: () => (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          class="w-5 h-5"
-        >
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M22 2v20H2V2h20zm-2 2H4v16h16V4z"
-          />
-        </svg>
-      ),
-      href: "/contact",
-    },
-  };
-
   const [isMenuOpen, setIsMenuOpen] = createSignal(false);
 
-  return (
-    <div class="min-h-20">
-      <header class="fixed top-0 left-0 right-0 z-50 shadow-lg">
-        <div class="bg-gradient-to-r from-blue-600/70 to-purple-600/70 text-white rounded-b-md">
-          <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-            <button
-              class="md:hidden focus:outline-none rounded-full p-2 hover:bg-blue/20"
-              onClick={() => setIsMenuOpen(!isMenuOpen())}
-              aria-label="Toggle Menu"
-            >
-              {isMenuOpen() ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              )}
-            </button>
+  const closeMenu = () => setIsMenuOpen(false);
 
-            <nav
-              class={`
-                ${isMenuOpen() ? "block" : "hidden"} 
-                absolute top-full left-0 w-full bg-gradient-to-r from-indigo-400/60 to-purple-600/60
-                md:static md:block md:w-auto
-                transition-all duration-300 ease-in-out
-                rounded-3xl shadow-lg
-              `}
-            >
-              <ul class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
-                {Object.keys(sections).map((key) => (
-                  <li
-                    class={`
-                      group relative cursor-pointer 
-                      hover:bg-purple-700/20
-                      rounded-full transition-transform duration-300 ease-in-out
-                      hover:scale-110
-                    `}
+  const sections = createMemo(() => {
+    const baseSections: Section[] = [
+      {
+        id: "about",
+        title: "Sobre Nós",
+        icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+        href: "/about",
+      },
+      {
+        id: "contact",
+        title: "Contato",
+        icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+        href: "/contact",
+      },
+    ];
+
+    if (isLoggedIn()) {
+      return [
+        ...baseSections,
+        {
+          id: "profile",
+          title: "Perfil",
+          icon: "M12 14c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8z",
+          href: "/profile",
+        },
+        {
+          id: "logout",
+          title: "Sair",
+          icon: "M16 7v10m2-5H6",
+          href: "/logout",
+        },
+      ];
+    }
+
+    return baseSections;
+  });
+
+  return (
+    <div class="min-h-16">
+      <header class="fixed top-0 left-0 right-0 z-50">
+        <Motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          class="bg-gradient-to-r from-blue-600 to-indigo-800 text-white shadow-lg"
+        >
+          <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+              <div class="flex items-center">
+                <a href="/" class="flex-shrink-0">
+                  <img class="h-8 w-8" src="/assets/logo.png" alt="Logo" />
+                </a>
+                <div class="hidden md:block">
+                  <div class="ml-10 flex items-baseline space-x-4">
+                    <For each={sections()}>
+                      {(section) => (
+                        <Motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          class="flex items-center justify-center"
+                        >
+                          <a
+                            href={section.href}
+                            class="group relative flex items-center justify-center p-3 rounded-md transition-all duration-300 ease-in-out"
+                          >
+                            <svg
+                              class="h-6 w-6 text-gray-300 group-hover:text-white transition-colors duration-300 ease-in-out"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d={section.icon}
+                              />
+                            </svg>
+                            <span class="absolute -bottom-7 text-sm font-medium text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              {section.title}
+                            </span>
+                          </a>
+                        </Motion.div>
+                      )}
+                    </For>
+                  </div>
+                </div>
+              </div>
+              <div class="-mr-2 flex md:hidden">
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen())}
+                  class="bg-indigo-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-indigo-800 focus:ring-white"
+                  aria-expanded="false"
+                >
+                  <span class="sr-only">Open main menu</span>
+                  <svg
+                    class={`${isMenuOpen() ? "hidden" : "block"} h-6 w-6`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
                   >
-                    <a
-                      class="
-                        w-full flex items-center justify-center md:justify-start 
-                        gap-3 px-5 py-3 text-sm font-medium rounded-full
-                        bg-transparent hover:bg-white/20 transition-colors
-                      "
-                      href={sections[key as SectionKey].href}
-                    >
-                      {sections[key as SectionKey].icon()}
-                      <span class="hidden md:inline">
-                        {sections[key as SectionKey].title}
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                  <svg
+                    class={`${isMenuOpen() ? "block" : "hidden"} h-6 w-6`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+
+          <Motion.div
+            class={`${isMenuOpen() ? "block" : "hidden"} md:hidden`}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{
+              opacity: isMenuOpen() ? 1 : 0,
+              y: isMenuOpen() ? 0 : -20,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <For each={sections()}>
+                {(section) => (
+                  <a
+                    href={section.href}
+                    onClick={closeMenu}
+                    class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+                  >
+                    {section.title}
+                  </a>
+                )}
+              </For>
+            </div>
+          </Motion.div>
+        </Motion.div>
       </header>
     </div>
   );

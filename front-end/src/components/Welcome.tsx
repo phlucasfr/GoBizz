@@ -1,23 +1,63 @@
 import SignUp from "./SignUp";
+import { Motion } from "@motionone/solid";
+import { isLoggedIn } from "../App";
+import { ArrowRight } from "lucide-solid";
+import { useNavigate } from "@solidjs/router";
+import { createMemo, createSignal, onMount } from "solid-js";
 
 const Welcome = () => {
-  return (
-    <div class="flex flex-col md:flex-row h-screen">
-      <div class="flex flex-col items-center justify-center w-full md:w-2/3 p-6 bg-gray-100">
-        <div class="text-center max-w-xl">
-          <h1 class="text-2xl md:text-4xl font-bold mb-6 text-black">
-            Bem-vindo à Nossa Plataforma
-          </h1>
-          <p class="text-base md:text-xl text-black">
-            Transforme sua gestão empresarial com ferramentas inteligentes e
-            recursos completos.
-          </p>
-        </div>
-      </div>
+  const id = localStorage.getItem("id");
+  const navigate = useNavigate();
 
-      <div class="w-full md:w-1/3 flex items-center justify-center p-6 overflow-auto">
-        <SignUp />
-      </div>
+  const [mounted, setMounted] = createSignal(false);
+
+  onMount(async () => {
+    createMemo(() => {
+      if (isLoggedIn()) {
+        navigate(`/home/${id}`);
+      } else {
+        setMounted(true);
+      }
+    });
+  });
+
+  return (
+    <div class="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: mounted() ? 1 : 0, x: mounted() ? 0 : -20 }}
+        transition={{ duration: 0.5 }}
+        class="flex flex-col items-center justify-center w-full lg:w-3/5 p-8 lg:p-16"
+      >
+        <div class="text-center max-w-2xl">
+          <h1 class="text-3xl lg:text-5xl font-bold mb-6 text-indigo-900 leading-tight">
+            Transforme Sua Gestão Empresarial
+          </h1>
+          <p class="text-lg lg:text-xl text-indigo-700 mb-8">
+            Descubra ferramentas inteligentes e recursos completos para
+            impulsionar o sucesso do seu negócio.
+          </p>
+          <Motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-full text-lg font-semibold transition-colors duration-300 hover:bg-indigo-700"
+          >
+            Conheça Nossos Produtos
+            <ArrowRight class="ml-2 h-5 w-5" />
+          </Motion.button>
+        </div>
+      </Motion.div>
+
+      <Motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: mounted() ? 1 : 0, x: mounted() ? 0 : 20 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        class="w-screen lg:w-2/5 flex items-center justify-center p-8 lg:p-16"
+      >
+        <div class="w-screen max-w-md">
+          <SignUp />
+        </div>
+      </Motion.div>
     </div>
   );
 };

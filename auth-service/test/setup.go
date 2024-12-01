@@ -10,6 +10,7 @@ import (
 
 type TestRepositories struct {
 	*repository.CompanyRepository
+	*repository.SessionRepository
 }
 
 func SetupTestContainers(t *testing.T) (*TestRepositories, error) {
@@ -21,9 +22,11 @@ func SetupTestContainers(t *testing.T) (*TestRepositories, error) {
 	postgresContainer, err := SetupPostgresTestContainer(ctx)
 	require.NoError(t, err)
 
+	sessionRepo := repository.NewSessionRepository(redisContainer.Client)
 	companyRepo := repository.NewCompanyRepository(postgresContainer.Pool, redisContainer.Client)
 
 	return &TestRepositories{
 		CompanyRepository: companyRepo,
+		SessionRepository: sessionRepo,
 	}, nil
 }

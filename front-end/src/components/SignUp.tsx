@@ -1,9 +1,10 @@
 import SmsVerificationModal from "./SmsVerificationModal";
-
+import { Motion } from "@motionone/solid";
+import { apiConfig } from "../config/apiConfig";
 import { useNavigate } from "@solidjs/router";
+import { Eye, EyeOff } from 'lucide-solid';
 import { createSignal, createResource, Show } from "solid-js";
 import { maskCpfCnpj, maskPhone, validateEmail } from "../util/Index";
-import { apiConfig } from "../config/apiConfig";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const SignUp = () => {
     password: "",
   });
   const [error, setError] = createSignal("");
+  const [showPassword, setShowPassword] = createSignal(false);
   const [isModalVisible, setIsModalVisible] = createSignal(false);
 
   const handleChange = (e: Event) => {
@@ -35,6 +37,7 @@ const SignUp = () => {
 
     const cleanPhone = phone.replace(/\D/g, "");
     const cleanCpfCnpj = cpfCnpj.replace(/\D/g, "");
+    const lowerCaseEmail = email.toLowerCase()
 
     if (!name || !email || !phone || !cpfCnpj || password.length < 8) {
       throw new Error("Preencha todos os campos obrigatórios corretamente.");
@@ -46,8 +49,8 @@ const SignUp = () => {
 
     const payload = {
       name,
-      email,
       phone: cleanPhone,
+      email: lowerCaseEmail,
       cpf_cnpj: cleanCpfCnpj,
       password,
     };
@@ -96,21 +99,31 @@ const SignUp = () => {
         }}
       />
 
-      <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-[50vh] max-w-md p-8 rounded-lg shadow-lg space-y-6">
-          <h2 class="text-3xl font-semibold text-blue-600 text-center">
+      <div class="min-h-fit flex items-center justify-center p-4 ">
+        <Motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          class="w-full max-w-md p-8 bg-white rounded-xl shadow-2xl space-y-6"
+        >
+          <h2 class="text-3xl font-bold text-indigo-700 text-center">
             Cadastre Sua Empresa
           </h2>
 
           <Show when={error()}>
-            <div class="mb-4 p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded-lg">
+            <Motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+              class="p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded-lg"
+            >
               {error()}
-            </div>
+            </Motion.div>
           </Show>
 
           <form onSubmit={handleSubmit} class="space-y-6">
             <div>
-              <label for="name" class="block text-lg font-medium text-gray-700">
+              <label for="name" class="block text-sm font-medium text-gray-700">
                 Nome da Empresa
               </label>
               <input
@@ -120,15 +133,16 @@ const SignUp = () => {
                 value={formData().name}
                 onInput={handleChange}
                 required
-                class="text-black mt-2 block w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                       focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+                       disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none
+                       invalid:border-pink-500 invalid:text-pink-600
+                       focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
               />
             </div>
 
             <div>
-              <label
-                for="email"
-                class="block text-lg font-medium text-gray-700"
-              >
+              <label for="email" class="block text-sm font-medium text-gray-700">
                 E-mail
               </label>
               <input
@@ -138,15 +152,16 @@ const SignUp = () => {
                 value={formData().email}
                 onInput={handleChange}
                 required
-                class="text-black mt-2 block w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                       focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+                       disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none
+                       invalid:border-pink-500 invalid:text-pink-600
+                       focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
               />
             </div>
 
             <div>
-              <label
-                for="phone"
-                class="block text-lg font-medium text-gray-700"
-              >
+              <label for="phone" class="block text-sm font-medium text-gray-700">
                 Telefone
               </label>
               <input
@@ -156,15 +171,16 @@ const SignUp = () => {
                 value={formData().phone}
                 onInput={handleChange}
                 required
-                class="text-black mt-2 block w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                       focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+                       disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none
+                       invalid:border-pink-500 invalid:text-pink-600
+                       focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
               />
             </div>
 
             <div>
-              <label
-                for="cpfCnpj"
-                class="block text-lg font-medium text-gray-700"
-              >
+              <label for="cpfCnpj" class="block text-sm font-medium text-gray-700">
                 CPF/CNPJ
               </label>
               <input
@@ -174,51 +190,69 @@ const SignUp = () => {
                 value={formData().cpfCnpj}
                 onInput={handleChange}
                 required
-                class="text-black mt-2 block w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                       focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+                       disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none
+                       invalid:border-pink-500 invalid:text-pink-600
+                       focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
               />
             </div>
 
             <div>
-              <label
-                for="password"
-                class="block text-lg font-medium text-gray-700"
-              >
+              <label for="password" class="block text-sm font-medium text-gray-700">
                 Senha
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData().password}
-                onInput={handleChange}
-                required
-                class="text-black mt-2 block w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div class="mt-1 relative rounded-md shadow-sm">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword() ? "text" : "password"}
+                  value={formData().password}
+                  onInput={handleChange}
+                  required
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
+                         focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword())}
+                    class="text-gray-400 hover:text-gray-500 focus:outline-none focus:text-gray-500"
+                  >
+                    {showPassword() ? <EyeOff class="h-5 w-5" /> : <Eye class="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={data.loading}
-              class={`w-full py-3 px-5 rounded-lg shadow-md text-white ${
-                data.loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-500"
-              } focus:outline-none focus:ring-2 focus:ring-blue-600`}
+            <Motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {data.loading ? "Carregando..." : "Cadastrar"}
-            </button>
+              <button
+                type="submit"
+                disabled={data.loading}
+                class={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
+                        ${data.loading ? "bg-indigo-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}
+                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+              >
+                {data.loading ? "Carregando..." : "Cadastrar"}
+              </button>
+            </Motion.div>
           </form>
 
-          <div class="mt-4 text-center text-black">
-            <p class="text-sm">
+          <div class="mt-4 text-center text-sm text-gray-600">
+            <p>
               Já tem uma conta?{" "}
               <a
                 onClick={() => navigate("/login")}
-                class="text-blue-600 hover:text-blue-500 cursor-pointer"
+                class="font-medium text-indigo-600 hover:text-indigo-500 cursor-pointer"
               >
                 Faça login
               </a>
             </p>
           </div>
-        </div>
+        </Motion.div>
       </div>
     </>
   );

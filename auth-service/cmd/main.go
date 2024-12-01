@@ -32,7 +32,7 @@ func initRedis() (*redis.Client, error) {
 	return rdb, nil
 }
 
-func initServer(companyHandler *handlers.CompanyHandler) *fiber.App {
+func initServer(companyHandler *handlers.CompanyHandler, sessionHandler *handlers.SessionHandler) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName: "Your Company Management API",
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -44,15 +44,21 @@ func initServer(companyHandler *handlers.CompanyHandler) *fiber.App {
 
 	app.Use(logger.New())
 	app.Use(recover.New())
+	//TODO: Move origins to .env
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowMethods: "GET,POST,PUT,DELETE",
+		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
+		AllowOrigins:     "http://localhost:5173,http://192.168.15.49:5173,http://localhost:4173/,https://gobizz.vercel.app/",
+		AllowCredentials: true,
 	}))
 
 	v1 := app.Group("/v1")
+	v1.Get("/companies/:id", companyHandler.GetByID)
 	v1.Post("/companies", companyHandler.Create)
 	v1.Post("/companies/sms/verify", companyHandler.VerifyCompanyBySms)
-	v1.Get("/companies/:id", companyHandler.GetByID)
+
+	v1.Get("/sessions", sessionHandler.ValidateSession)
+	v1.Post("/sessions", sessionHandler.CreateSession)
+	v1.Delete("/sessions", sessionHandler.DeleteSession)
 
 	return app
 }
@@ -69,11 +75,13 @@ func main() {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
 
+	sessionRepo := repository.NewSessionRepository(rdb)
 	companyRepo := repository.NewCompanyRepository(db, rdb)
 
-	companyHandler := handlers.NewCompanyHandler(companyRepo)
+	sessionHandler := handlers.NewSessionHandler(sessionRepo)
+	companyHandler := handlers.NewCompanyHandler(companyRepo, sessionRepo)
 
-	app := initServer(companyHandler)
+	app := initServer(companyHandler, sessionHandler)
 
 	log.Fatal(app.Listen(":3000"))
 }

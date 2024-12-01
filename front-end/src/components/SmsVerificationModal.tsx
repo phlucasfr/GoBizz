@@ -1,4 +1,7 @@
 import { apiConfig } from "../config/apiConfig";
+import { useNavigate } from "@solidjs/router";
+import { setIsLoggedIn } from "../App";
+import { validateSession } from "../api/api";
 import { createSignal, Show } from "solid-js";
 
 interface VerificationModalProps {
@@ -7,6 +10,7 @@ interface VerificationModalProps {
 }
 
 const SmsVerificationModal = (props: VerificationModalProps) => {
+  const navigate = useNavigate();
   const [code, setCode] = createSignal("");
   const [error, setError] = createSignal("");
   const [isSubmitting, setIsSubmitting] = createSignal(false);
@@ -46,13 +50,29 @@ const SmsVerificationModal = (props: VerificationModalProps) => {
           credentials: "include",
         }
       );
+      const data = await response.json();
 
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.message || "Falha ao verificar o código.");
-      } else {
-        props.onClose();
       }
+
+      const sessionData = await validateSession();
+
+      if (sessionData instanceof Error) {
+        throw new Error(
+          sessionData.message || "Falha na verificação da sessão."
+        );
+      }
+
+      if (sessionData.isValid) {
+        setIsLoggedIn(true);
+        navigate(`/home/${id}`);
+      } else {
+        setIsLoggedIn(false);
+        navigate("/login");
+      }
+
+      props.onClose();
     } catch (err: any) {
       setError(err.message || "Erro inesperado. Tente novamente.");
     } finally {

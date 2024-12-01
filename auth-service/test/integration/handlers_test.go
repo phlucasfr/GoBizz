@@ -26,7 +26,7 @@ func TestServerRoutes(t *testing.T) {
 	repositories, err := test.SetupTestContainers(t)
 	assert.NoError(t, err)
 
-	companyHandler := handlers.NewCompanyHandler(repositories.CompanyRepository)
+	companyHandler := handlers.NewCompanyHandler(repositories.CompanyRepository, repositories.SessionRepository)
 
 	app := fiber.New(fiber.Config{
 		AppName: "Your Company Management API",

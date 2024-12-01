@@ -83,31 +83,31 @@ func (r *CompanyRepository) Create(ctx context.Context, req domain.CreateCompany
 	}, nil
 }
 
-func (r *CompanyRepository) VerifyCompanyBySms(ctx context.Context, req *domain.VerifyCompanyBySmsRequest) (bool, error) {
+func (r *CompanyRepository) VerifyCompanyBySms(ctx context.Context, req *domain.VerifyCompanyBySmsRequest) error {
 	company, err := r.GetByID(ctx, req.ID)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	verified, err := util.CheckVerificationCode(&company.Phone, &req.Code)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if verified {
 		err := r.persistCompanyInDB(ctx, company)
 		if err != nil {
-			return false, err
+			return err
 		}
 
 		cacheKey := fmt.Sprintf("company:%x", company.ID.String())
 		err = r.redis.Del(ctx, cacheKey).Err()
 		if err != nil {
-			return false, fmt.Errorf("erro ao remover empresa do cache Redis após persistência: %v", err)
+			return fmt.Errorf("erro ao remover empresa do cache Redis após persistência: %v", err)
 		}
 	}
 
-	return verified, nil
+	return nil
 }
 
 func (r *CompanyRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Company, error) {
