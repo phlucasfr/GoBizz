@@ -88,6 +88,27 @@ func (q *Queries) DeleteCompany(ctx context.Context, id pgtype.UUID) (int64, err
 	return result.RowsAffected(), nil
 }
 
+const getCompanyByEmail = `-- name: GetCompanyByEmail :one
+SELECT id, name, email, phone, cpf_cnpj, is_active, updated_at, created_at, hashed_password FROM company WHERE email = $1
+`
+
+func (q *Queries) GetCompanyByEmail(ctx context.Context, email string) (Company, error) {
+	row := q.db.QueryRow(ctx, getCompanyByEmail, email)
+	var i Company
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Phone,
+		&i.CpfCnpj,
+		&i.IsActive,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.HashedPassword,
+	)
+	return i, err
+}
+
 const getCompanyByID = `-- name: GetCompanyByID :one
 SELECT id, name, email, phone, cpf_cnpj, is_active, updated_at, created_at, hashed_password FROM company WHERE id = $1
 `
@@ -210,4 +231,25 @@ func (q *Queries) UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (C
 		&i.HashedPassword,
 	)
 	return i, err
+}
+
+const updatePasswordByEmail = `-- name: UpdatePasswordByEmail :execrows
+UPDATE company
+SET
+  hashed_password = $2,
+  updated_at = NOW()
+WHERE email = $1
+`
+
+type UpdatePasswordByEmailParams struct {
+	Email          string `json:"email"`
+	HashedPassword string `json:"hashed_password"`
+}
+
+func (q *Queries) UpdatePasswordByEmail(ctx context.Context, arg UpdatePasswordByEmailParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updatePasswordByEmail, arg.Email, arg.HashedPassword)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

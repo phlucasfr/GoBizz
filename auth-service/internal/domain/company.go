@@ -18,6 +18,15 @@ type CreateCompanyResponse struct {
 	Name string    `json:"name"`
 }
 
+type LoginRequest struct {
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required,min=8"`
+}
+
+type PasswordRecoveryRequest struct {
+	Email string `json:"email" validate:"required"`
+}
+
 type VerifyCompanyBySmsRequest struct {
 	ID   uuid.UUID `json:"id" validate:"required"`
 	Code string    `json:"code" validate:"required,min=6"`

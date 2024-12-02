@@ -6,30 +6,13 @@ import SignIn from "./components/SignIn";
 import Welcome from "./components/Welcome";
 import Contact from "./components/Contact";
 import NotFound from "./components/NotFound";
+import ResetPasswordPage from "./components/ResetPasswordPage";
+
 import { withAuth } from "./middleware/withAuth";
 import { Router, Route } from "@solidjs/router";
-import { validateSession } from "./api/api";
-import { createSignal, onMount, Show } from "solid-js";
-
-export const [isLoggedIn, setIsLoggedIn] = createSignal(false);
-export const [loadingAuth, setLoadingAuth] = createSignal(true);
+import { AuthProvider } from "./components/context/AuthContext";
 
 const App = () => {
-  onMount(async () => {
-    const sessionData = await validateSession().then();
-
-    if (sessionData instanceof Error) {
-      if (sessionData.message !== "Usuário não autorizado") {
-        console.error(sessionData);
-      }
-      setIsLoggedIn(false);
-    } else {
-      setIsLoggedIn(sessionData.isValid);
-    }
-
-    setLoadingAuth(false);
-  });
-
   const routes = [
     {
       path: "/",
@@ -38,7 +21,7 @@ const App = () => {
     {
       path: "/home/:id",
       component: withAuth(Home),
-    },
+    },   
     {
       path: "/about",
       component: About,
@@ -55,14 +38,15 @@ const App = () => {
       path: "*",
       component: NotFound,
     },
+    {
+      path: "/reset-password",
+      component: ResetPasswordPage
+    },
   ];
 
   return (
-    <Show
-      when={!loadingAuth()}
-      fallback={<div>Carregando autenticação...</div>}
-    >
-      <>
+    <>
+      <AuthProvider>
         <Header />
         <Router>
           {routes.map((route) => (
@@ -70,8 +54,8 @@ const App = () => {
           ))}
         </Router>
         <Footer />
-      </>
-    </Show>
+      </AuthProvider>
+    </>
   );
 };
 

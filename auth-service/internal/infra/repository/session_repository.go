@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"time"
 
 	"auth-service/internal/domain"
@@ -30,7 +29,6 @@ func (r *SessionRepository) Create(ctx context.Context, session *domain.Session)
 	key := "session:" + session.ID
 	ttl := time.Until(session.ExpiresAt)
 
-	log.Println("create>key:", key)
 	return r.redis.Set(ctx, key, sessionData, ttl).Err()
 }
 
@@ -59,18 +57,13 @@ func (r *SessionRepository) Delete(ctx context.Context, sessionID string) error 
 
 func (r *SessionRepository) Validate(ctx context.Context, sessionID string) (*domain.Session, error) {
 	key := "session:" + sessionID
-	log.Println("validate>key:", key)
 
 	sessionData, err := r.redis.Get(ctx, key).Result()
 	if err == redis.Nil {
-		log.Println("entrou no nil")
-
 		return nil, nil
 	} else if err != nil {
 		return nil, err
 	}
-
-	log.Println("sessionData:", sessionData)
 
 	var session domain.Session
 	if err := json.Unmarshal([]byte(sessionData), &session); err != nil {

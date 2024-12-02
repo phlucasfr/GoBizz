@@ -21,6 +21,11 @@ func RandomInt(min, max int64) int64 {
 	return min + randGen.Int63n(max-min+1)
 }
 
+func GenerateResetToken(email string) string {
+	timestamp := time.Now().Unix()
+	return fmt.Sprintf("%x", timestamp) + ":" + email
+}
+
 func GenerateRandomCode() string {
 	code := randGen.Intn(1000000)
 	return fmt.Sprintf("%06d", code)

@@ -1,20 +1,17 @@
-import { isLoggedIn } from "../App";
 import { useNavigate } from "@solidjs/router";
-import { RouteSectionProps } from "@solidjs/router";
-import { JSX, createMemo, Component } from "solid-js";
+import { validateSession } from "../api/api";
+import { Component, createEffect } from "solid-js";
 
-export function withAuth<P extends RouteSectionProps<unknown>>(
-  Component: Component<P>
-) {
-  return (props: P): JSX.Element => {
+export const withAuth = (Component: Component) => {
+
+  return (props: any) => {
     const navigate = useNavigate();
 
-    createMemo(() => {
-      if (!isLoggedIn()) {
-        navigate("/login", { replace: true });
-      }
+    createEffect(async () => {
+      const sessionData = await validateSession();
+      if (!sessionData.isValid) return navigate("/login", { replace: true });
     });
 
     return <Component {...props} />;
   };
-}
+};

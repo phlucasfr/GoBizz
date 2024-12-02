@@ -14,10 +14,12 @@ type Querier interface {
 	ActivateCompany(ctx context.Context, id pgtype.UUID) (Company, error)
 	CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error)
 	DeleteCompany(ctx context.Context, id pgtype.UUID) (int64, error)
+	GetCompanyByEmail(ctx context.Context, email string) (Company, error)
 	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
 	HasActiveCompany(ctx context.Context, arg HasActiveCompanyParams) (bool, error)
 	ListCompanies(ctx context.Context, arg ListCompaniesParams) ([]Company, error)
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)
+	UpdatePasswordByEmail(ctx context.Context, arg UpdatePasswordByEmailParams) (int64, error)
 }
 
 var _ Querier = (*Queries)(nil)

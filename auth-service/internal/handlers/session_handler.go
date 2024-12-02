@@ -4,7 +4,6 @@ import (
 	"auth-service/internal/domain"
 	"auth-service/internal/infra/repository"
 	"auth-service/pkg/util"
-	"log"
 	"os"
 
 	"time"
@@ -66,7 +65,6 @@ func (h *SessionHandler) CreateSession(c *fiber.Ctx) error {
 
 func (h *SessionHandler) ValidateSession(c *fiber.Ctx) error {
 	tokenString := c.Cookies("session_id")
-	log.Println("validatesession>tokenstring:", tokenString)
 	if tokenString == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Session ID is missing",

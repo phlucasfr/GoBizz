@@ -14,6 +14,7 @@ import (
 	"auth-service/internal/infra/cache"
 	"auth-service/internal/infra/database"
 	"auth-service/internal/infra/repository"
+	"auth-service/pkg/util"
 )
 
 func initDB() (*pgxpool.Pool, error) {
@@ -42,18 +43,22 @@ func initServer(companyHandler *handlers.CompanyHandler, sessionHandler *handler
 		},
 	})
 
+	env := util.GetConfig(".")
+
 	app.Use(logger.New())
 	app.Use(recover.New())
-	//TODO: Move origins to .env
 	app.Use(cors.New(cors.Config{
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
-		AllowOrigins:     "http://localhost:5173,http://192.168.15.49:5173,http://localhost:4173/,https://gobizz.vercel.app/",
+		AllowOrigins:     env.AllowedOrigins,
 		AllowCredentials: true,
 	}))
 
 	v1 := app.Group("/v1")
 	v1.Get("/companies/:id", companyHandler.GetByID)
+	v1.Put("/companies/reset-password", companyHandler.ResetPassword)
 	v1.Post("/companies", companyHandler.Create)
+	v1.Post("/companies/login", companyHandler.Login)
+	v1.Post("/companies/recovery", companyHandler.RecoverPassword)
 	v1.Post("/companies/sms/verify", companyHandler.VerifyCompanyBySms)
 
 	v1.Get("/sessions", sessionHandler.ValidateSession)

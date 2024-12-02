@@ -13,8 +13,11 @@ type Config struct {
 	MasterKey                 string `mapstructure:"MASTER_KEY"`
 	RedisPort                 string `mapstructure:"REDIS_PORT"`
 	RedisHost                 string `mapstructure:"REDIS_HOST"`
+	AllowedOrigins            string `mapstructure:"ALLOWED_ORIGINS"`
+	FrontendSource            string `mapstructure:"FRONTEND_SOURCE"`
 	TwilioUsername            string `mapstructure:"TWILIO_USERNAME"`
 	TwilioPassword            string `mapstructure:"TWILIO_PASSWORD"`
+	SendGridApiKey            string `mapstructure:"SENDGRID_API_KEY"`
 	TwilioVerificationService string `mapstructure:"TWILIO_VERIFICATION_SERVICE"`
 }
 
@@ -31,8 +34,11 @@ func GetConfig(path string) *Config {
 				MasterKey:                 os.Getenv("MASTER_KEY"),
 				RedisPort:                 os.Getenv("REDIS_PORT"),
 				RedisHost:                 os.Getenv("REDIS_HOST"),
+				AllowedOrigins:            os.Getenv("ALLOWED_ORIGINS"),
+				FrontendSource:            os.Getenv("FRONTEND_SOURCE"),
 				TwilioUsername:            os.Getenv("TWILIO_USERNAME"),
 				TwilioPassword:            os.Getenv("TWILIO_PASSWORD"),
+				SendGridApiKey:            os.Getenv("SENDGRID_API_KEY"),
 				TwilioVerificationService: os.Getenv("TWILIO_VERIFICATION_SERVICE"),
 			}
 		} else {

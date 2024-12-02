@@ -1,10 +1,11 @@
-import SmsVerificationModal from "./SmsVerificationModal";
+import SmsVerificationModal from "./modals/SmsVerificationModal";
+
 import { Motion } from "@motionone/solid";
 import { apiConfig } from "../config/apiConfig";
 import { useNavigate } from "@solidjs/router";
-import { Eye, EyeOff } from 'lucide-solid';
-import { createSignal, createResource, Show } from "solid-js";
+import { Eye, EyeOff } from "lucide-solid";
 import { maskCpfCnpj, maskPhone, validateEmail } from "../util/Index";
+import { createSignal, createEffect, createResource, Show } from "solid-js";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -16,8 +17,13 @@ const SignUp = () => {
     password: "",
   });
   const [error, setError] = createSignal("");
+  const [mounted, setMounted] = createSignal(false);
   const [showPassword, setShowPassword] = createSignal(false);
   const [isModalVisible, setIsModalVisible] = createSignal(false);
+
+  createEffect(() => {
+    setMounted(true);
+  });
 
   const handleChange = (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -37,7 +43,7 @@ const SignUp = () => {
 
     const cleanPhone = phone.replace(/\D/g, "");
     const cleanCpfCnpj = cpfCnpj.replace(/\D/g, "");
-    const lowerCaseEmail = email.toLowerCase()
+    const lowerCaseEmail = email.toLowerCase();
 
     if (!name || !email || !phone || !cpfCnpj || password.length < 8) {
       throw new Error("Preencha todos os campos obrigatórios corretamente.");
@@ -99,31 +105,51 @@ const SignUp = () => {
         }}
       />
 
-      <div class="min-h-fit flex items-center justify-center p-4 ">
+      <div class="min-h-screen flex items-center justify-center p-4">
         <Motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, x: 20, scale: 0.9 }}
+          animate={{
+            opacity: mounted() ? 1 : 0,
+            x: mounted() ? 0 : 20,
+            scale: mounted() ? 1 : 0.9,
+          }}
           transition={{ duration: 0.5 }}
-          class="w-full max-w-md p-8 bg-white rounded-xl shadow-2xl space-y-6"
+          class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg space-y-6"
         >
-          <h2 class="text-3xl font-bold text-indigo-700 text-center">
-            Cadastre Sua Empresa
-          </h2>
+          <Motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h2 class="text-3xl font-bold text-center text-indigo-900 mb-6">
+              Cadastre Sua Empresa
+            </h2>
+          </Motion.div>
 
           <Show when={error()}>
             <Motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
-              class="p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded-lg"
+              id="error-message"
+              role="alert"
+              tabIndex={-1}
+              class="mb-4 p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded-lg"
             >
               {error()}
             </Motion.div>
           </Show>
 
           <form onSubmit={handleSubmit} class="space-y-6">
-            <div>
-              <label for="name" class="block text-sm font-medium text-gray-700">
+            <Motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <label
+                for="name"
+                class="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Nome da Empresa
               </label>
               <input
@@ -133,16 +159,20 @@ const SignUp = () => {
                 value={formData().name}
                 onInput={handleChange}
                 required
-                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
-                       focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
-                       disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none
-                       invalid:border-pink-500 invalid:text-pink-600
-                       focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                placeholder="Sua empresa"
               />
-            </div>
+            </Motion.div>
 
-            <div>
-              <label for="email" class="block text-sm font-medium text-gray-700">
+            <Motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <label
+                for="email"
+                class="block text-sm font-medium text-gray-700 mb-1"
+              >
                 E-mail
               </label>
               <input
@@ -152,16 +182,20 @@ const SignUp = () => {
                 value={formData().email}
                 onInput={handleChange}
                 required
-                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
-                       focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
-                       disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none
-                       invalid:border-pink-500 invalid:text-pink-600
-                       focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                placeholder="seu@email.com"
               />
-            </div>
+            </Motion.div>
 
-            <div>
-              <label for="phone" class="block text-sm font-medium text-gray-700">
+            <Motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <label
+                for="phone"
+                class="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Telefone
               </label>
               <input
@@ -171,16 +205,20 @@ const SignUp = () => {
                 value={formData().phone}
                 onInput={handleChange}
                 required
-                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
-                       focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
-                       disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none
-                       invalid:border-pink-500 invalid:text-pink-600
-                       focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                placeholder="(00) 00000-0000"
               />
-            </div>
+            </Motion.div>
 
-            <div>
-              <label for="cpfCnpj" class="block text-sm font-medium text-gray-700">
+            <Motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+            >
+              <label
+                for="cpfCnpj"
+                class="block text-sm font-medium text-gray-700 mb-1"
+              >
                 CPF/CNPJ
               </label>
               <input
@@ -190,68 +228,89 @@ const SignUp = () => {
                 value={formData().cpfCnpj}
                 onInput={handleChange}
                 required
-                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
-                       focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
-                       disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 disabled:shadow-none
-                       invalid:border-pink-500 invalid:text-pink-600
-                       focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                placeholder="000.000.000-00 ou 00.000.000/0000-00"
               />
-            </div>
-
-            <div>
-              <label for="password" class="block text-sm font-medium text-gray-700">
-                Senha
-              </label>
-              <div class="mt-1 relative rounded-md shadow-sm">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword() ? "text" : "password"}
-                  value={formData().password}
-                  onInput={handleChange}
-                  required
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
-                         focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword())}
-                    class="text-gray-400 hover:text-gray-500 focus:outline-none focus:text-gray-500"
-                  >
-                    {showPassword() ? <EyeOff class="h-5 w-5" /> : <Eye class="h-5 w-5" />}
-                  </button>
-                </div>
-              </div>
-            </div>
+            </Motion.div>
 
             <Motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+              class="relative"
+            >
+              <label
+                for="password"
+                class="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Senha
+              </label>
+              <input
+                id="password"
+                name="password"
+                type={showPassword() ? "text" : "password"}
+                value={formData().password}
+                onInput={handleChange}
+                required
+                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                placeholder="Sua senha"
+              />
+              <Motion.div
+                class="absolute right-3 top-8 text-gray-500 focus:outline-none"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword())}
+                  aria-label={
+                    showPassword() ? "Esconder senha" : "Mostrar senha"
+                  }
+                >
+                  {showPassword() ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </Motion.div>
+            </Motion.div>
+
+            <Motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <button
                 type="submit"
                 disabled={data.loading}
-                class={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-                        ${data.loading ? "bg-indigo-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}
-                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                class="w-full bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-3 px-5 rounded-lg shadow-md hover:from-indigo-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {data.loading ? "Carregando..." : "Cadastrar"}
+                {data.loading ? "Cadastrando..." : "Cadastrar"}
               </button>
             </Motion.div>
           </form>
 
-          <div class="mt-4 text-center text-sm text-gray-600">
-            <p>
+          <Motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
+            class="mt-4 text-center text-gray-600"
+          >
+            <p class="text-sm">
               Já tem uma conta?{" "}
-              <a
-                onClick={() => navigate("/login")}
-                class="font-medium text-indigo-600 hover:text-indigo-500 cursor-pointer"
+              <Motion.div
+                class="inline-block"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Faça login
-              </a>
+                <a
+                  onClick={() => navigate("/login")}
+                  class="text-indigo-600 hover:text-indigo-500 cursor-pointer font-medium transition-colors duration-200"
+                >
+                  Faça login
+                </a>
+              </Motion.div>
             </p>
-          </div>
+          </Motion.div>
         </Motion.div>
       </div>
     </>

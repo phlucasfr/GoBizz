@@ -1,24 +1,26 @@
 import SignUp from "./SignUp";
+
 import { Motion } from "@motionone/solid";
-import { isLoggedIn } from "../App";
+import { useAuth } from "./context/AuthContext";
 import { ArrowRight } from "lucide-solid";
 import { useNavigate } from "@solidjs/router";
-import { createMemo, createSignal, onMount } from "solid-js";
+import { validateSession } from "../api/api";
+import { getStoredCompanyId } from "../util/Index";
+import { createEffect, createSignal } from "solid-js";
 
 const Welcome = () => {
-  const id = localStorage.getItem("id");
+  const id = getStoredCompanyId();
   const navigate = useNavigate();
-
+  const { login } = useAuth();
   const [mounted, setMounted] = createSignal(false);
 
-  onMount(async () => {
-    createMemo(() => {
-      if (isLoggedIn()) {
-        navigate(`/home/${id}`);
-      } else {
-        setMounted(true);
-      }
-    });
+  createEffect(async () => {
+    const sessionData = await validateSession();
+    if (sessionData.isValid) {
+      login();
+      return navigate(`/home/${id}`, { replace: true });
+    }
+    setMounted(true);
   });
 
   return (
