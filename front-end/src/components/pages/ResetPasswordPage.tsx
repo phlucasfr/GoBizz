@@ -1,10 +1,11 @@
 import { Motion } from "@motionone/solid";
-import { resetPassword } from "../api/api";
-import { useSearchParams } from "@solidjs/router";
+import { resetPassword } from "../../api/api";
 import { createSignal, Show } from "solid-js";
+import { useSearchParams, useNavigate } from "@solidjs/router";
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const tokenParam = searchParams.token;
   const token = Array.isArray(tokenParam) ? tokenParam[0] : tokenParam;
 
@@ -48,6 +49,10 @@ const ResetPasswordPage = () => {
         response.message || "Erro ao redefinir a senha. Tente novamente."
       );
     }
+  };
+
+  const handleReturnToMain = () => {
+    navigate("/");
   };
 
   return (
@@ -131,6 +136,13 @@ const ResetPasswordPage = () => {
             {isSubmitting() ? "Redefinindo..." : "Redefinir Senha"}
           </button>
         </form>
+
+        <button
+          onClick={handleReturnToMain}
+          class="w-full bg-gray-200 text-gray-800 py-3 px-5 rounded-lg shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
+        >
+          Voltar para a Página Principal
+        </button>
       </Motion.div>
     </div>
   );

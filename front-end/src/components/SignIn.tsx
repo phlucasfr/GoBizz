@@ -71,6 +71,7 @@ const SignIn = () => {
     if (!response.success) {
       setError(response.message);
       setIsSubmitting(false);
+      return;
     }
 
     login();
@@ -234,7 +235,7 @@ const SignIn = () => {
               whileTap={{ scale: 0.95 }}
             >
               <a
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/register")}
                 class="text-indigo-600 hover:text-indigo-500 cursor-pointer font-medium transition-colors duration-200"
               >
                 Registre-se

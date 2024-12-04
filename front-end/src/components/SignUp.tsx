@@ -1,4 +1,4 @@
-import SmsVerificationModal from "./modals/SmsVerificationModal";
+import EmailVerificationModal from "./modals/EmailVerificationModal";
 
 import { Motion } from "@motionone/solid";
 import { apiConfig } from "../config/apiConfig";
@@ -19,7 +19,7 @@ const SignUp = () => {
   const [error, setError] = createSignal("");
   const [mounted, setMounted] = createSignal(false);
   const [showPassword, setShowPassword] = createSignal(false);
-  const [isModalVisible, setIsModalVisible] = createSignal(false);
+  const [isEmailModalVisible, setEmailModalVisible] = createSignal(false);
 
   createEffect(() => {
     setMounted(true);
@@ -72,15 +72,11 @@ const SignUp = () => {
       }
     );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Erro ao cadastrar a empresa.");
-    }
-
     const data = await response.json();
-    localStorage.setItem("id", data.id);
+    if (!response.ok) return setError(data.error);
 
-    setIsModalVisible(true);
+    localStorage.setItem("id", data.id);
+    setEmailModalVisible(true);
   };
 
   const [data, { refetch }] = createResource(submitForm);
@@ -98,30 +94,33 @@ const SignUp = () => {
 
   return (
     <>
-      <SmsVerificationModal
-        isVisible={isModalVisible()}
+      <EmailVerificationModal
+        isVisible={isEmailModalVisible()}
         onClose={() => {
-          setIsModalVisible(false);
+          setEmailModalVisible(false);
         }}
       />
-
-      <div class="min-h-screen flex items-center justify-center p-4">
+      <Motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: mounted() ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+        class="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8"
+      >
         <Motion.div
-          initial={{ opacity: 0, x: 20, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{
             opacity: mounted() ? 1 : 0,
-            x: mounted() ? 0 : 20,
             scale: mounted() ? 1 : 0.9,
           }}
           transition={{ duration: 0.5 }}
-          class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg space-y-6"
+          class="w-full max-w-md bg-white rounded-xl shadow-lg p-6 sm:p-8 space-y-6"
         >
           <Motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h2 class="text-3xl font-bold text-center text-indigo-900 mb-6">
+            <h2 class="text-2xl sm:text-3xl font-bold text-center text-indigo-900 mb-6">
               Cadastre Sua Empresa
             </h2>
           </Motion.div>
@@ -134,13 +133,13 @@ const SignUp = () => {
               id="error-message"
               role="alert"
               tabIndex={-1}
-              class="mb-4 p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded-lg"
+              class="mb-4 p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded-lg text-sm"
             >
               {error()}
             </Motion.div>
           </Show>
 
-          <form onSubmit={handleSubmit} class="space-y-6">
+          <form onSubmit={handleSubmit} class="space-y-4 sm:space-y-6">
             <Motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -159,7 +158,7 @@ const SignUp = () => {
                 value={formData().name}
                 onInput={handleChange}
                 required
-                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                class="block w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm sm:text-base"
                 placeholder="Sua empresa"
               />
             </Motion.div>
@@ -182,7 +181,7 @@ const SignUp = () => {
                 value={formData().email}
                 onInput={handleChange}
                 required
-                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                class="block w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm sm:text-base"
                 placeholder="seu@email.com"
               />
             </Motion.div>
@@ -205,7 +204,7 @@ const SignUp = () => {
                 value={formData().phone}
                 onInput={handleChange}
                 required
-                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                class="block w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm sm:text-base"
                 placeholder="(00) 00000-0000"
               />
             </Motion.div>
@@ -228,7 +227,7 @@ const SignUp = () => {
                 value={formData().cpfCnpj}
                 onInput={handleChange}
                 required
-                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                class="block w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm sm:text-base"
                 placeholder="000.000.000-00 ou 00.000.000/0000-00"
               />
             </Motion.div>
@@ -252,7 +251,7 @@ const SignUp = () => {
                 value={formData().password}
                 onInput={handleChange}
                 required
-                class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                class="block w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm sm:text-base"
                 placeholder="Sua senha"
               />
               <Motion.div
@@ -276,13 +275,13 @@ const SignUp = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.8 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <button
                 type="submit"
                 disabled={data.loading}
-                class="w-full bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-3 px-5 rounded-lg shadow-md hover:from-indigo-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                class="w-full bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-2 sm:py-3 px-4 sm:px-5 rounded-lg shadow-md hover:from-indigo-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm sm:text-base font-medium"
               >
                 {data.loading ? "Cadastrando..." : "Cadastrar"}
               </button>
@@ -312,7 +311,7 @@ const SignUp = () => {
             </p>
           </Motion.div>
         </Motion.div>
-      </div>
+      </Motion.div>
     </>
   );
 };

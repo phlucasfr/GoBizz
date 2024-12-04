@@ -17,6 +17,14 @@ SELECT EXISTS (
 -- name: ListCompanies :many
 SELECT * FROM company ORDER BY created_at DESC LIMIT $1 OFFSET $2;
 
+-- name: ActivateCompanyByEmail :one
+UPDATE company
+SET
+  is_active = true,
+  updated_at = NOW()
+WHERE email = $1
+RETURNING *;
+
 -- name: UpdatePasswordByEmail :execrows
 UPDATE company
 SET

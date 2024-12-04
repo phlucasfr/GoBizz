@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -32,25 +33,19 @@ func (h *CompanyHandler) Create(c *fiber.Ctx) error {
 		})
 	}
 
-	company, err := h.repo.Create(c.Context(), req)
+	response, err := h.repo.Create(c.Context(), req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(company)
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
 func (h *CompanyHandler) GetByID(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error": "empresa não encontrada",
-			})
-		}
-
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid company ID",
 		})
@@ -71,34 +66,6 @@ func (h *CompanyHandler) GetByID(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": c.JSON(company),
-	})
-}
-
-func (h *CompanyHandler) VerifyCompanyBySms(c *fiber.Ctx) error {
-	var req domain.VerifyCompanyBySmsRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request payload",
-		})
-	}
-
-	err := h.repo.VerifyCompanyBySms(c.Context(), &req)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	sessionHandler := NewSessionHandler(h.sessionRepo)
-	err = sessionHandler.CreateSession(c)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "Verification successful",
 	})
 }
 
@@ -170,9 +137,7 @@ func (h *CompanyHandler) RecoverPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	token := util.GenerateResetToken(req.Email)
-
-	if err := h.repo.SendRecoveryEmail(c.Context(), token, req.Email); err != nil {
+	if err := h.repo.SendRecoveryEmail(c.Context(), req.Email); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
 		})
@@ -183,10 +148,67 @@ func (h *CompanyHandler) RecoverPassword(c *fiber.Ctx) error {
 	})
 }
 
+func (h *CompanyHandler) SendVerificationEmail(c *fiber.Ctx) error {
+	var req *domain.ActivateCompanyByEmailRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request payload",
+		})
+	}
+
+	if err := h.repo.SendVerificationEmail(c.Context(), req.Email); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "E-mail de recuperação enviado com sucesso!",
+	})
+}
+
+func (h *CompanyHandler) VerifyCompanyByEmail(c *fiber.Ctx) error {
+	var req *domain.VerifyCompanyByEmailRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request payload",
+		})
+	}
+
+	tokenParts := strings.Split(req.Token, ":")
+	if len(tokenParts) != 2 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid token format",
+		})
+	}
+
+	email := tokenParts[1]
+
+	err := h.repo.ValidateEmailVerificationToken(c.Context(), email, req.Token)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if err := h.repo.ActivateCompanyByEmail(c.Context(), email); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Empresa ativada com sucesso.",
+	})
+}
+
 func (h *CompanyHandler) ResetPassword(c *fiber.Ctx) error {
-	var req struct {
-		Token    string `json:"token"`
-		Password string `json:"password"`
+	var req *domain.ResetPasswordRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request payload",
+		})
 	}
 
 	if err := c.BodyParser(&req); err != nil {

@@ -23,21 +23,21 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required,min=8"`
 }
 
+type ResetPasswordRequest struct {
+	Token    string `json:"token" validate:"required"`
+	Password string `json:"password" validate:"required,min=8"`
+}
+
 type PasswordRecoveryRequest struct {
 	Email string `json:"email" validate:"required"`
 }
 
-type VerifyCompanyBySmsRequest struct {
-	ID   uuid.UUID `json:"id" validate:"required"`
-	Code string    `json:"code" validate:"required,min=6"`
+type ActivateCompanyByEmailRequest struct {
+	Email string `json:"email" validate:"required"`
 }
 
-type UpdateCompanyRequest struct {
-	Name     *string `json:"name"`
-	Email    *string `json:"email"`
-	Phone    *string `json:"phone"`
-	CPFCNPJ  *string `json:"cpf_cnpj"`
-	IsActive *bool   `json:"is_active"`
+type VerifyCompanyByEmailRequest struct {
+	Token string `json:"token" validate:"required"`
 }
 
 type Company struct {

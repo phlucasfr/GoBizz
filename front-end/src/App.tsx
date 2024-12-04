@@ -3,14 +3,16 @@ import About from "./components/About";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import SignIn from "./components/SignIn";
+import SignUp from "./components/SignUp";
 import Welcome from "./components/Welcome";
 import Contact from "./components/Contact";
 import NotFound from "./components/NotFound";
-import ResetPasswordPage from "./components/ResetPasswordPage";
+import ResetPasswordPage from "./components/pages/ResetPasswordPage";
+import EmailVerificationPage from "./components/pages/EmailVerificationPage";
 
 import { withAuth } from "./middleware/withAuth";
-import { Router, Route } from "@solidjs/router";
 import { AuthProvider } from "./components/context/AuthContext";
+import { Router, Route } from "@solidjs/router";
 
 const App = () => {
   const routes = [
@@ -31,6 +33,10 @@ const App = () => {
       component: SignIn,
     },
     {
+      path: "/register",
+      component: SignUp,
+    },
+    {
       path: "/contact",
       component: Contact,
     },
@@ -41,6 +47,10 @@ const App = () => {
     {
       path: "/reset-password",
       component: ResetPasswordPage
+    },
+    {
+      path: "/email-verification",
+      component: EmailVerificationPage
     },
   ];
 

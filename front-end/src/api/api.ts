@@ -89,6 +89,40 @@ export async function validateSession() {
   }
 }
 
+export async function sendVerificationEmail(email: string) {
+  try {
+    const response = await fetch(
+      `${apiConfig.baseUrl}${apiConfig.endpoints.emailVerification}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return {
+        success: false,
+        message: errorData?.error || "Erro ao enviar o e-mail de verificação.",
+      };
+    }
+
+    return {
+      success: true,
+      message: "E-mail de verificação enviado com sucesso.",
+    };
+  } catch (error) {
+    console.error("Erro ao enviar e-mail de verificação:", error);
+    return {
+      success: false,
+      message: "Erro inesperado ao tentar enviar o e-mail de verificação.",
+    };
+  }
+}
+
 export async function sendPasswordRecoveryEmail(email: string) {
   try {
     const response = await fetch(
@@ -150,13 +184,47 @@ export async function resetPassword(token: string, password: string) {
 
     return {
       success: true,
-      message: "Senha com sucesso.",
+      message: "Senha alterada com sucesso.",
     };
   } catch (error) {
     console.error("Erro ao alterar a senha:", error);
     return {
       success: false,
       message: "Erro inesperado ao tentar enviar o e-mail de recuperação.",
+    };
+  }
+}
+
+export async function VerifyCompanyByEmail(token: string) {
+  try {
+    const response = await fetch(
+      `${apiConfig.baseUrl}${apiConfig.endpoints.emailVerification}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      return {
+        success: false,
+        message: data?.error || "Erro ao verificar empresa.",
+      };
+    }
+
+    return {
+      success: true,
+      message: data?.message || "Empresa verificada com sucesso.",
+    };
+  } catch (error) {
+    console.error("Erro ao verificar a empresa:", error);
+    return {
+      success: false,
+      message: "Erro inesperado ao tentar verificar a empresa.",
     };
   }
 }

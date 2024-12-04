@@ -1,5 +1,5 @@
 import { Motion } from "@motionone/solid";
-import { BarChart3, FileText, Link, Package, ShoppingCart, Users } from "lucide-solid";
+import { BarChart3, FileText, Link, Package, ShoppingCart } from "lucide-solid";
 
 export type FeatureCardProps = {
   href: string;
@@ -9,12 +9,6 @@ export type FeatureCardProps = {
 };
 
 export const features: FeatureCardProps[] = [
-  {
-    title: "Cadastro de Funcionários",
-    icon: Users,
-    color: "text-blue-500",
-    href: "/employees",
-  },
   {
     title: "E-commerce",
     icon: ShoppingCart,

@@ -55,14 +55,19 @@ func initServer(companyHandler *handlers.CompanyHandler, sessionHandler *handler
 
 	v1 := app.Group("/v1")
 	v1.Get("/companies/:id", companyHandler.GetByID)
+
 	v1.Put("/companies/reset-password", companyHandler.ResetPassword)
+	v1.Put("/companies/email-verification", companyHandler.VerifyCompanyByEmail)
+
 	v1.Post("/companies", companyHandler.Create)
 	v1.Post("/companies/login", companyHandler.Login)
 	v1.Post("/companies/recovery", companyHandler.RecoverPassword)
-	v1.Post("/companies/sms/verify", companyHandler.VerifyCompanyBySms)
+	v1.Post("/companies/email-verification", companyHandler.SendVerificationEmail)
 
 	v1.Get("/sessions", sessionHandler.ValidateSession)
+
 	v1.Post("/sessions", sessionHandler.CreateSession)
+
 	v1.Delete("/sessions", sessionHandler.DeleteSession)
 
 	return app

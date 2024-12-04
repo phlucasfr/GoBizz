@@ -3,147 +3,143 @@ import { useAuth } from "./context/AuthContext";
 import { Home, Info, Mail, Menu, X } from "lucide-solid";
 import { createSignal, createMemo, For, Show } from "solid-js";
 
-type SectionKey = "home" | "about" | "contact" | "profile" | "logout";
+type SectionKey = "about" | "contact" | "login" | "register";
 type Section = {
   id: SectionKey;
   href: string;
   icon: typeof Home;
   title: string;
-  action?: () => void;
 };
 
 const Header = () => {
   const { isLoggedIn } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = createSignal(false);
-  
+
   const closeMenu = () => setIsMenuOpen(false);
 
-  const sections = createMemo<Section[]>(() => {
-    const baseSections: Section[] = [
-      {
-        id: "about",
-        href: "/about",
-        icon: Info,
-        title: "Sobre Nós",
-      },
-      {
-        id: "contact",
-        href: "/contact",
-        icon: Mail,
-        title: "Contato",
-      },
-    ];
-
-    return baseSections;
-  });
+  const sections = createMemo<Section[]>(() => [
+    {
+      id: "about",
+      href: "/about",
+      icon: Info,
+      title: "Sobre Nós",
+    },
+    {
+      id: "contact",
+      href: "/contact",
+      icon: Mail,
+      title: "Contato",
+    },
+  ]);
 
   return (
     <Show when={!isLoggedIn()}>
-      <div class="min-h-16">
-        <header class="fixed top-0 left-0 right-0 z-50">
-          <Motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            class="bg-gradient-to-r from-blue-600 to-indigo-800 text-white shadow-lg"
-          >
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                  <a
-                    href="/"
-                    class="flex-shrink-0"
-                    onClick={() => {
-                      setIsMenuOpen(!isMenuOpen());
-                    }}
-                  >
-                    <img class="h-8 w-8" src="/assets/logo.png" alt="Logo" />
-                  </a>
-                  <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                      <For each={sections()}>
-                        {(section) => (
-                          <Motion.div
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            class="flex items-center justify-center"
-                          >
-                            <a
-                              href={section.href}
-                              onClick={(e) => {
-                                if (section.action) {
-                                  e.preventDefault();
-                                  section.action();
-                                }
-                              }}
-                              class="group relative flex items-center justify-center p-3 rounded-md transition-all duration-300 ease-in-out"
-                            >
-                              <section.icon
-                                class="h-6 w-6 text-gray-300 group-hover:text-white transition-colors duration-300 ease-in-out"
-                                aria-hidden="true"
-                              />
-                              <span class="absolute -bottom-7 text-sm font-medium text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                {section.title}
-                              </span>
-                            </a>
-                          </Motion.div>
-                        )}
-                      </For>
-                    </div>
-                  </div>
-                </div>
-                <div class="-mr-2 flex md:hidden">
-                  <button
-                    onClick={() => setIsMenuOpen(!isMenuOpen())}
-                    class="bg-indigo-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-indigo-800 focus:ring-white"
-                    aria-expanded="false"
-                  >
-                    <span class="sr-only">Open main menu</span>
-                    {isMenuOpen() ? (
-                      <X class="block h-6 w-6" aria-hidden="true" />
-                    ) : (
-                      <Menu class="block h-6 w-6" aria-hidden="true" />
+      <Motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md"
+      >
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16">
+            <div class="flex items-center">
+              <a href="/" class="flex-shrink-0">
+                <img
+                  class="h-10 w-auto"
+                  src="/assets/logo.png"
+                  alt="GoBizz Logo"
+                />
+              </a>
+              <div class="hidden md:block ml-10">
+                <div class="flex items-baseline space-x-4">
+                  <For each={sections()}>
+                    {(section) => (
+                      <a
+                        href={section.href}
+                        class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300"
+                      >
+                        {section.title}
+                      </a>
                     )}
-                  </button>
+                  </For>
                 </div>
               </div>
             </div>
+            <div class="hidden md:flex items-center space-x-4">
+              <a
+                href="/register"
+                class="bg-white text-indigo-600 border border-indigo-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 transition-colors duration-300"
+              >
+                Cadastrar
+              </a>
+              <a
+                href="/login"
+                class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors duration-300"
+              >
+                Entrar
+              </a>
+            </div>
+            <div class="-mr-2 flex md:hidden">
+              <Motion.button
+                onClick={() => setIsMenuOpen(!isMenuOpen())}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                aria-expanded="false"
+              >
+                <span class="sr-only">Abrir menu principal</span>
+                {isMenuOpen() ? (
+                  <X class="block h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Menu class="block h-6 w-6" aria-hidden="true" />
+                )}
+              </Motion.button>
+            </div>
+          </div>
+        </nav>
 
-            <Motion.div
-              class={`${isMenuOpen() ? "block" : "hidden"} md:hidden`}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{
-                opacity: isMenuOpen() ? 1 : 0,
-                y: isMenuOpen() ? 0 : -20,
-              }}
-              transition={{ duration: 0.3 }}
+        <Motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{
+            opacity: isMenuOpen() ? 1 : 0,
+            height: isMenuOpen() ? "auto" : 0,
+          }}
+          transition={{ duration: 0.3 }}
+          class={`md:hidden ${isMenuOpen() ? "block" : "hidden"}`}
+        >
+          <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <For each={sections()}>
+              {(section) => (
+                <a
+                  href={section.href}
+                  class="text-gray-600 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300"
+                  onClick={closeMenu}
+                >
+                  {section.title}
+                </a>
+              )}
+            </For>
+            <a
+              href="/register"
+              class="block w-full text-left bg-white text-indigo-600 border border-indigo-600 px-3 py-2 rounded-md text-base font-medium hover:bg-indigo-50 transition-colors duration-300 mt-2"
+              onClick={closeMenu}
             >
-              <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <For each={sections()}>
-                  {(section) => (
-                    <a
-                      href={section.href}
-                      onClick={(e) => {
-                        if (section.action) {
-                          e.preventDefault();
-                          section.action();
-                        }
-                        closeMenu();
-                      }}
-                      class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-base font-medium w-full text-left flex items-center"
-                    >
-                      <section.icon class="h-5 w-5 mr-2" aria-hidden="true" />
-                      {section.title}
-                    </a>
-                  )}
-                </For>
-              </div>
-            </Motion.div>
-          </Motion.div>
-        </header>
-      </div>
+              Cadastrar
+            </a>
+            <a
+              href="/login"
+              class="block w-full text-left bg-indigo-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-indigo-700 transition-colors duration-300 mt-2"
+              onClick={closeMenu}
+            >
+              Entrar
+            </a>
+          </div>
+        </Motion.div>
+      </Motion.div>
+      <div class="h-16"></div>
     </Show>
   );
 };
 
 export default Header;
+

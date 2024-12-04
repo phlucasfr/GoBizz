@@ -4,8 +4,8 @@ export const apiConfig = {
     company: "/v1/companies",
     sessions: "/v1/sessions",
     recovery: "/v1/companies/recovery",
-    smsVerify: "/v1/companies/sms/verify",
     companyLogin: "/v1/companies/login",
-    resetPassword: "/v1/companies/reset-password",    
+    resetPassword: "/v1/companies/reset-password",  
+    emailVerification: "/v1/companies/email-verification"  
   },
 };

@@ -6,13 +6,13 @@ import { Motion } from "@motionone/solid";
 import { useAuth } from "./context/AuthContext";
 import { useParams } from "@solidjs/router";
 import { useNavigate } from "@solidjs/router";
-import { deleteSession } from "../api/api";
+import { deleteSession, validateSession } from "../api/api";
 import FeatureCard, { features } from "./cards/FeatureCard";
 import { createSignal, createEffect, For, Show } from "solid-js";
 
 const Home = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { login, logout } = useAuth();
 
   const params = useParams();
   const [userName, setUserName] = createSignal("");
@@ -26,6 +26,16 @@ const Home = () => {
     setIsLogoutModalOpen(false);
     navigate("/", { replace: true });
   };
+
+  createEffect(async () => {
+    const sessionData = await validateSession();
+    if (!sessionData.isValid) {
+      logout()
+      return navigate(`/login`, { replace: true });
+    }
+    
+    login();
+  });
 
   createEffect(() => {
     setUserName("Usuário");

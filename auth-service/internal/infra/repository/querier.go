@@ -12,6 +12,7 @@ import (
 
 type Querier interface {
 	ActivateCompany(ctx context.Context, id pgtype.UUID) (Company, error)
+	ActivateCompanyByEmail(ctx context.Context, email string) (Company, error)
 	CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error)
 	DeleteCompany(ctx context.Context, id pgtype.UUID) (int64, error)
 	GetCompanyByEmail(ctx context.Context, email string) (Company, error)
