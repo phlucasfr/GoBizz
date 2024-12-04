@@ -74,6 +74,7 @@ func TestServerRoutes(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
 	})
 
+	//TODO: Fix test
 	t.Run("GET /v1/companies/:id", func(t *testing.T) {
 		req := httptest.NewRequest("GET", fmt.Sprintf("/v1/companies/%s", companyID.String()), nil)
 		resp, err := app.Test(req)
