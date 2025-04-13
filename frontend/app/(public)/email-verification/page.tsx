@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { apiConfig } from '@/api/config';
 import { apiRequest } from '@/api/api';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -51,38 +51,41 @@ export default function EmailVerification() {
     }, [searchParams, router]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <Card className="w-full max-w-md">
-                <CardHeader>
-                    <CardTitle className="text-center">Email Verification</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {status === 'loading' && (
-                        <div className="flex flex-col items-center space-y-4">
-                            <Loader2 className="h-8 w-8 animate-spin" />
-                            <p className="text-center">{message}</p>
-                        </div>
-                    )}
+        <Suspense fallback={<div>Loading...</div>}>
 
-                    {status === 'success' && (
-                        <div className="space-y-4">
-                            <p className="text-center text-green-600">{message}</p>
-                            <Button
-                                className="w-full"
-                                onClick={() => router.push('/login')}
-                            >
-                                Go to Login
-                            </Button>
-                        </div>
-                    )}
+            <div className="min-h-screen flex items-center justify-center p-4">
+                <Card className="w-full max-w-md">
+                    <CardHeader>
+                        <CardTitle className="text-center">Email Verification</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {status === 'loading' && (
+                            <div className="flex flex-col items-center space-y-4">
+                                <Loader2 className="h-8 w-8 animate-spin" />
+                                <p className="text-center">{message}</p>
+                            </div>
+                        )}
 
-                    {status === 'error' && (
-                        <div className="space-y-4">
-                            <p className="text-center text-red-600">{message}</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+                        {status === 'success' && (
+                            <div className="space-y-4">
+                                <p className="text-center text-green-600">{message}</p>
+                                <Button
+                                    className="w-full"
+                                    onClick={() => router.push('/login')}
+                                >
+                                    Go to Login
+                                </Button>
+                            </div>
+                        )}
+
+                        {status === 'error' && (
+                            <div className="space-y-4">
+                                <p className="text-center text-red-600">{message}</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+        </Suspense>
     );
 } 
