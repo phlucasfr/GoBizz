@@ -39,7 +39,7 @@ func initRedis() (*redis.Client, error) {
 
 func init() {
 	err := godotenv.Load()
-	if err != nil {
+	if err != nil && os.Getenv("ENVIRONMENT") != "production" {
 		currentDir, err := os.Getwd()
 		if err != nil {
 			log.Fatalf("error getting current directory: %v", err)

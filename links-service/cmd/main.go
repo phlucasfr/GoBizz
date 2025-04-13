@@ -25,10 +25,13 @@ func initPostgres() (*pgxpool.Pool, error) {
 }
 
 func init() {
-	err := godotenv.Load("./.env")
-	if err != nil {
-		log.Fatalf("error during loading .env: %v", err)
+	if (os.Getenv("ENVIRONMENT")) != "production" {
+		err := godotenv.Load("./.env")
+		if err != nil {
+			log.Fatalf("error during loading .env: %v", err)
+		}
 	}
+
 	utils.LoadEnvInstance()
 }
 
