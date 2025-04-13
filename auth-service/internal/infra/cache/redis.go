@@ -10,7 +10,7 @@ import (
 )
 
 func getRedisPassword() string {
-	if os.Getenv("RAILWAY_ENVIRONMENT_NAME") == "production" {
+	if os.Getenv("ENVIRONMENT") == "production" {
 		return os.Getenv("REDIS_PASSWORD")
 	}
 	return ""
