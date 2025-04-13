@@ -16,7 +16,7 @@ export default function ResetPasswordContent() {
 
     const [token, setToken] = useState('');
     const [error, setError] = useState('');
-    const [status, setStatus] = useState < 'loading' | 'form' | 'success' | 'error' > ('loading');
+    const [status, setStatus] = useState<'loading' | 'form' | 'success' | 'error'>('loading');
     const [message, setMessage] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
