@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-function ResetPasswordContent() {
+export default function ResetPasswordContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -67,7 +67,6 @@ function ResetPasswordContent() {
             setTimeout(() => {
                 router.push('/login');
             }, 3000);
-
         } catch (error) {
             console.error('Reset password error:', error);
             setStatus('error');
@@ -99,7 +98,7 @@ function ResetPasswordContent() {
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     required
-                                    minLength={6}
+                                    minLength={8}
                                 />
                             </div>
 
@@ -111,7 +110,7 @@ function ResetPasswordContent() {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
-                                    minLength={6}
+                                    minLength={8}
                                 />
                             </div>
 
@@ -130,10 +129,7 @@ function ResetPasswordContent() {
                     {status === 'success' && (
                         <div className="space-y-4">
                             <p className="text-center text-green-600">{message}</p>
-                            <Button
-                                className="w-full"
-                                onClick={() => router.push('/login')}
-                            >
+                            <Button className="w-full" onClick={() => router.push('/login')}>
                                 Go to Login
                             </Button>
                         </div>
@@ -142,10 +138,7 @@ function ResetPasswordContent() {
                     {status === 'error' && (
                         <div className="space-y-4">
                             <p className="text-center text-red-600">{message}</p>
-                            <Button
-                                className="w-full"
-                                onClick={() => router.push('/login')}
-                            >
+                            <Button className="w-full" onClick={() => router.push('/login')}>
                                 Back to Login
                             </Button>
                         </div>
@@ -154,4 +147,4 @@ function ResetPasswordContent() {
             </Card>
         </div>
     );
-} 
+}
