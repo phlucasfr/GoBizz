@@ -56,6 +56,8 @@ async function makeRequest(
     headers: Record<string, string>,
     body?: string
 ): Promise<Response> {
+    console.log("debug deploy:", apiConfig.baseUrl);
+    
     return fetch(`${apiConfig.baseUrl}${endpoint}`, {
         method,
         headers,
