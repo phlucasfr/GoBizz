@@ -11,6 +11,9 @@ export const publicRoutes = [
 const REDIRECT_WHEN_NOT_AUTH_ROUTE = '/login'
 
 export function middleware(request: NextRequest) {
+  console.log('✅ Middleware is running')
+
+
   const pathname = request.nextUrl.pathname
   const authToken = request.cookies.get('auth-token')?.value
   const publicRoute = publicRoutes.find((route) => route.path === pathname)
