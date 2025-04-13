@@ -35,5 +35,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sitemap|robots).*)']
+  matcher: ['/', '/login', '/register', '/dashboard/:path*', '/reset-password', '/email-verification'],
 }
