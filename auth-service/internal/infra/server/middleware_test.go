@@ -19,7 +19,7 @@ type testResponse struct {
 
 func TestEncryptionMiddleware(t *testing.T) {
 	app := fiber.New()
-	masterKey := "01234567890123456789012345678901"
+	masterKey := utils.ConfigInstance.MasterKey
 
 	app.Use(EncryptionMiddleware())
 	app.Post("/test", func(c *fiber.Ctx) error {
