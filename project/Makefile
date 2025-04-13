@@ -4,4 +4,4 @@ run:
 stop:
 	docker-compose down
 
-phony: up_build
+phony: run stop

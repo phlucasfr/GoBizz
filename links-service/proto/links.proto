@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package links;
+
+option go_package = "links-service/proto";
+
+service LinksService {
+  rpc CreateLink(CreateLinkRequest) returns (CreateLinkResponse) {}
+  rpc GetLink(GetLinkRequest) returns (GetLinkResponse) {}
+  rpc GetCustomerLinks(GetCustomerLinksRequest) returns (GetCustomerLinksResponse) {}
+  rpc DeteLink(DeleteLinkRequest) returns (DeleteLinkResponse) {}
+  rpc UpdateLink(UpdateLinkRequest) returns (UpdateLinkResponse) {}
+  rpc UpdateLinkClicks(UpdateLinkClicksRequest) returns (UpdateLinkClicksResponse) {}
+}
+
+message CreateLinkRequest {
+  string original_url = 1;
+  string custom_slug = 2;
+  string customer_id = 3;
+  optional string expiration_date = 4;
+}
+
+message CreateLinkResponse {
+  string id = 1;
+  string short_url = 2;
+  string custom_slug = 3;
+  int32 clicks = 4;
+  string created_at = 5;
+  string updated_at = 6;
+  string customer_id = 7;
+  optional string expiration_date = 8;
+}
+
+message GetLinkRequest {
+  string short_url = 1;
+}
+
+message GetLinkResponse {
+  string id = 1;
+  string original_url = 2;
+  string short_url = 3;
+  string custom_slug = 4;
+  int32 clicks = 5;
+  string created_at = 6;
+  string updated_at = 7;
+  optional string expiration_date = 8;
+}
+
+message GetCustomerLinksRequest {
+  string customer_id = 1;
+}
+
+message GetCustomerLinksResponse {
+  repeated GetLinkResponse links = 1;
+}
+
+message DeleteLinkRequest {
+  string id = 1;
+  string customer_id = 2;
+}
+
+message DeleteLinkResponse {
+  bool success = 1;
+}
+
+message UpdateLinkRequest {
+  string id = 1;
+  string customer_id = 2;
+  string original_url = 3;
+  string custom_slug = 4;
+  optional string expiration_date = 5;
+}
+
+message UpdateLinkResponse {
+  string id = 1;
+  string original_url = 2;
+  string short_url = 3;
+  string custom_slug = 4;
+  int32 clicks = 5;
+  string created_at = 6;
+  string updated_at = 7;
+  string customer_id = 8;
+  optional string expiration_date = 9;
+}
+
+message UpdateLinkClicksRequest {
+  string id = 1;
+}
+
+message UpdateLinkClicksResponse {
+  string id = 1;
+  string original_url = 2;
+  string short_url = 3;
+  string custom_slug = 4;
+  int32 clicks = 5;
+  string created_at = 6;
+  string updated_at = 7;
+  string customer_id = 8;
+  optional string expiration_date = 9;
+} 

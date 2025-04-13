@@ -1,7 +1,7 @@
 package database
 
 import (
-	"auth-service/pkg/util"
+	"auth-service/utils"
 	"context"
 	"fmt"
 	"time"
@@ -10,17 +10,17 @@ import (
 )
 
 func NewPostgresConnection() (*pgxpool.Pool, error) {
-	env := util.GetConfig(".")
 
-	config, err := pgxpool.ParseConfig(env.DBSource)
+	config, err := pgxpool.ParseConfig(utils.ConfigInstance.DBSource)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse database URL: %v", err)
 	}
 
 	config.MaxConns = 50
 	config.MinConns = 10
-	config.MaxConnLifetime = time.Hour
-	config.MaxConnIdleTime = time.Minute * 30
+	config.MaxConnLifetime = time.Minute * 10
+	config.MaxConnIdleTime = time.Minute * 5
+	config.HealthCheckPeriod = 30 * time.Minute
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

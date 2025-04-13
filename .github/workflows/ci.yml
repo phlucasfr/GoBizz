@@ -11,14 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      CI_ENV: ${{ secrets.CI_ENV }}
       DB_SOURCE: ${{ secrets.DB_SOURCE }}
-      MASTER_KEY: ${{ secrets.MASTER_KEY }}
-      REDIS_PORT: ${{ secrets.REDIS_PORT }}
       REDIS_HOST: ${{ secrets.REDIS_HOST }}
-      TWILIO_USERNAME: ${{ secrets.TWILIO_USERNAME }}
-      TWILIO_PASSWORD: ${{ secrets.TWILIO_PASSWORD }}
-      TWILIO_VERIFICATION_SERVICE: ${{ secrets.TWILIO_VERIFICATION_SERVICE }}
+      REDIS_PORT: ${{ secrets.REDIS_PORT }}
+      MASTER_KEY: ${{ secrets.MASTER_KEY }}
+      ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
+      FRONTEND_SOURCE: ${{ secrets.FRONTEND_SOURCE }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      NEXT_PUBLIC_MASTER_KEY: ${{ secrets.NEXT_PUBLIC_MASTER_KEY }}
+      NEXT_PUBLIC_AUTH_SERVICE_API: ${{ secrets.NEXT_PUBLIC_AUTH_SERVICE_API }}    
 
     steps:
     - uses: actions/checkout@v3
