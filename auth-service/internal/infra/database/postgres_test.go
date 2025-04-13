@@ -5,13 +5,10 @@ import (
 	"log"
 	"testing"
 
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 )
 
 func TestInitDB(t *testing.T) {
-	err := godotenv.Load("../../../.env")
-	require.NoError(t, err, "Failed to load .env file")
 	utils.LoadEnvInstance()
 
 	log.Println("DB_SOURCE:", utils.ConfigInstance.DBSource)
