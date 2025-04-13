@@ -264,7 +264,7 @@ func (h *CustomerHandler) Logout(c *fiber.Ctx) error {
 		Name:     "auth-token",
 		Value:    "",
 		Expires:  time.Now().Add(-30 * time.Minute),
-		HTTPOnly: true,
+		HTTPOnly: false,
 		Secure:   true,
 		SameSite: "Strict",
 		Path:     "/",

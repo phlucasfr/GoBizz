@@ -21,9 +21,7 @@ export async function apiRequest<T>({
         const requestHeaders = prepareHeaders(headers, token);
 
         const response = await makeRequest(endpoint, method, requestHeaders, requestBody);
-        console.log("debug request:", response);
         const responseData = await response.json();
-        console.log("debug response:", responseData);
 
         if (!response.ok) return handleErrorResponse<T>(responseData);
 
@@ -57,9 +55,7 @@ async function makeRequest(
     method: string,
     headers: Record<string, string>,
     body?: string
-): Promise<Response> {
-    console.log("debug deploy:", apiConfig.baseUrl);
-    
+): Promise<Response> {    
     return fetch(`${apiConfig.baseUrl}${endpoint}`, {
         method,
         headers,
