@@ -14,7 +14,7 @@ import (
 func InitFiber(customerHandler *handlers.CustomerHandler, linksHandler *handlers.LinksHandler, rdb *redis.Client) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName: "auth-service API",
-		Prefork: true,
+		Prefork: false,
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
