@@ -14,9 +14,10 @@ export function middleware(request: NextRequest) {
   console.log('✅ Middleware is running')
 
   const pathname = request.nextUrl.pathname
-  const authToken = request.cookies.get('auth-token')?.value
+  const authToken = request.cookies.get('auth-token')
 
   const publicRoute = publicRoutes.find(route => pathname.startsWith(route.path))
+  alert('🚀 authToken: ' + authToken)
 
   // Se não autenticado e rota pública, continua
   if (!authToken && publicRoute) return NextResponse.next()
