@@ -183,7 +183,7 @@ func (h *CustomerHandler) Login(c *fiber.Ctx) error {
 		Value:    token,
 		Expires:  time.Now().Add(30 * time.Minute),
 		HTTPOnly: false,
-		Secure:   true,
+		Secure:   false,
 		SameSite: "None",
 		Path:     "/",
 	})
@@ -233,7 +233,7 @@ func (h *CustomerHandler) RefreshToken(c *fiber.Ctx) error {
 		Value:    newToken,
 		Expires:  time.Now().Add(30 * time.Minute),
 		HTTPOnly: false,
-		Secure:   true,
+		Secure:   false,
 		SameSite: "None",
 		Path:     "/",
 	})
@@ -265,7 +265,7 @@ func (h *CustomerHandler) Logout(c *fiber.Ctx) error {
 		Value:    "",
 		Expires:  time.Now().Add(-30 * time.Minute),
 		HTTPOnly: false,
-		Secure:   true,
+		Secure:   false,
 		SameSite: "Noneict",
 		Path:     "/",
 	})
