@@ -83,8 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (isMounted) {
             setUser(null)
             setIsAuthenticated(false)
-            deleteCookie('user-data')
-            deleteToken('auth-token')
           }
         }
       }
