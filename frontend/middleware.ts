@@ -14,10 +14,9 @@ export function middleware(request: NextRequest) {
   console.log('✅ Middleware is running')
 
   const pathname = request.nextUrl.pathname
-  const authToken = request.cookies.get('auth-token')
+  const authToken = request.cookies.get('auth-token')?.value
 
   const publicRoute = publicRoutes.find(route => pathname.startsWith(route.path))
-  alert('🚀 authToken: ' + authToken)
 
   // Se não autenticado e rota pública, continua
   if (!authToken && publicRoute) return NextResponse.next()
@@ -36,5 +35,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login', '/register', '/dashboard/:path*', '/reset-password', '/email-verification'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sitemap|robots).*)']
 }
