@@ -52,12 +52,22 @@ export default function AboutPage() {
                                 <Badge variant="outline" className="flex items-center gap-1">
                                     <Mail size={14} /> phlucasfr@gmail.com
                                 </Badge>
-                                <Badge variant="outline" className="flex items-center gap-1">
+                                <a
+                                    href="https://linkedin.com/in/phlucasfr"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 border border-primary rounded px-2 py-1 text-primary hover:bg-primary hover:text-white transition"
+                                >
                                     <Linkedin size={14} /> linkedin.com/in/phlucasfr
-                                </Badge>
-                                <Badge variant="outline" className="flex items-center gap-1">
+                                </a>
+                                <a
+                                    href="https://github.com/phlucasfr"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 border border-primary rounded px-2 py-1 text-primary hover:bg-primary hover:text-white transition"
+                                >
                                     <Github size={14} /> github.com/phlucasfr
-                                </Badge>
+                                </a>
                             </div>
                         </div>
                     </motion.section>
