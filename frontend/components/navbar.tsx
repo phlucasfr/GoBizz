@@ -36,7 +36,7 @@ export default function Navbar() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">G</span>
+              <img src="/gobizz.svg" alt="GoBizz Logo" className="w-6 h-6" />
             </div>
             <span className="font-bold text-lg">GoBizz</span>
           </Link>

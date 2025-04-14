@@ -87,7 +87,7 @@ export default function Login() {
       >
         <motion.div className="flex justify-center mb-6" variants={logoVariants}>
           <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-white font-bold">G</span>
+            <img src="/gobizz.svg" alt="GoBizz Logo" className="w-6 h-6" />
           </div>
         </motion.div>
 
