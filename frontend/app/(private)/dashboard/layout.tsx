@@ -1,21 +1,26 @@
+"use client"
+
 import type React from "react"
-
 import DashboardSidebar from "@/components/dashboard-sidebar"
-
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { useEffect } from 'react'
 import { verifyAuth } from "@/lib/auth"
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const token = localStorage.getItem("auth-token")
+  useEffect(() => {
+    const token = localStorage.getItem("auth-token")
+    if (!token) {
+      redirect("/login")
+    }
 
-  if (!token || !(await verifyAuth(token))) {
-    redirect("/login")
-  }
+    verifyAuth(token).then((isValid) => {
+      if (!isValid) redirect("/login")
+    })
+  }, [])
 
   return (
     <div className="flex min-h-screen">
@@ -24,4 +29,3 @@ export default async function DashboardLayout({
     </div>
   )
 }
-

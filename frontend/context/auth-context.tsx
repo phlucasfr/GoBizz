@@ -123,6 +123,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Refresh error:", error);
       setIsAuthenticated(false);
+      deleteCookie('user-data');
+      deleteToken('auth-token');
       return Promise.reject(error);
     } finally {
       setIsLoading(false);
