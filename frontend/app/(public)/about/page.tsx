@@ -1,12 +1,10 @@
 "use client"
 
-import { motion } from "framer-motion"
 import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { motion } from "framer-motion"
+import { Card, CardContent } from "@/components/ui/card"
 import { Briefcase, GraduationCap, Languages, Code, Github, Linkedin, Mail } from "lucide-react"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
 
 export default function AboutPage() {
     const containerVariants = {
@@ -34,8 +32,6 @@ export default function AboutPage() {
 
     return (
         <div className="flex min-h-screen flex-col">
-            <Navbar />
-
             <main className="flex-1 py-12 px-4 max-w-6xl mx-auto">
                 <motion.div className="space-y-12" initial="hidden" animate="visible" variants={containerVariants}>
                     {/* Hero Section */}
@@ -282,7 +278,6 @@ export default function AboutPage() {
                 </motion.div>
             </main>
 
-            <Footer />
         </div>
     )
 }

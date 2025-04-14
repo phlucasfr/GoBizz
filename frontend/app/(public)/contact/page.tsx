@@ -2,16 +2,11 @@
 
 import type React from "react"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { MapPin, Phone, Mail, Send, CheckCircle } from "lucide-react"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
+import { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { MapPin, Phone, Mail } from "lucide-react"
+
 
 export default function ContactPage() {
     const [formState, setFormState] = useState({
@@ -75,8 +70,6 @@ export default function ContactPage() {
 
     return (
         <div className="flex min-h-screen flex-col">
-            <Navbar />
-
             <main className="flex-1 py-12 px-4">
                 <motion.div className="max-w-6xl mx-auto" initial="hidden" animate="visible" variants={containerVariants}>
                     <motion.div className="text-center mb-12" variants={itemVariants}>
@@ -157,7 +150,6 @@ export default function ContactPage() {
                     </div>
                 </motion.div>
             </main>
-            <Footer />
         </div>
     )
 }
