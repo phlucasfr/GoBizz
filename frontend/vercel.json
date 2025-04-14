@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://powerful-kindness-production.up.railway.app/api/$1"
+    }
+  ]
+}
