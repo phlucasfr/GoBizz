@@ -1,4 +1,4 @@
-import { getCookie } from '@/context/auth-context';
+import { getToken } from '@/context/auth-context';
 import { apiConfig } from './config';
 import { ApiErrorHandler } from './error-handler';
 import { EncryptionService } from './encryption-service';
@@ -14,7 +14,7 @@ export async function apiRequest<T>({
     try {
         let token: string | undefined;
         if(isSecure) {
-            token = getCookie("auth-token");
+            token = getToken("auth-token");
         }
 
         const requestBody = prepareRequestBody(method, body);

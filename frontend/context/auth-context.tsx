@@ -25,6 +25,7 @@ interface LoginResponse {
 }
 
 interface RefreshSessionResponse {
+  token: string;
   success: boolean;
   message: string;
 }
@@ -58,17 +59,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true
 
     const checkAuth = async () => {
-      const token = getCookie("auth-token")
+      const token = getToken("auth-token")
 
       if (token) {
         try {
-          const userData = getCookie("user-data")
+          const userData = getToken("user-data")
           const user = JSON.parse(userData)
 
           const decodedToken = jwtDecode<{ exp: number }>(token)
           if (decodedToken.exp * 1000 < Date.now()) {
             deleteCookie('user-data')
-            deleteCookie('auth-token')
+            deleteToken('auth-token')
             throw new Error("Token expired")
           }
 
@@ -83,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null)
             setIsAuthenticated(false)
             deleteCookie('user-data')
-            deleteCookie('auth-token')
+            deleteToken('auth-token')
           }
         }
       }
@@ -116,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setIsAuthenticated(true);
+      setToken(response.data?.token || "");
 
       return Promise.resolve();
     } catch (error) {
@@ -153,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       setUser(user);
+      setToken(responseData.token || "");
       setIsAuthenticated(true);
       saveUserToCookie(user);
 
@@ -197,7 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      const token = getCookie("auth-token");
+      const token = getToken("auth-token");
 
       await apiRequest({
         method: 'POST',
@@ -213,7 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setIsAuthenticated(false);
       deleteCookie('user-data');
-      deleteCookie('auth-token');
+      deleteToken('auth-token');
 
       window.location.href = "/";
     }
@@ -244,18 +247,32 @@ export function useAuth() {
   return context
 }
 
+export function setToken(token: string) {
+  return localStorage.setItem('auth-token', token);
+}
+
+export function getToken(name: string): string {
+  return localStorage.getItem(name) || "";
+}
+
+export function deleteToken(name: string) {
+  localStorage.removeItem(name);
+}
+
 export function getCookie(name: string): string {
   if (typeof window === 'undefined') return "";
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || "";
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
+  if (match) {
+    return match[2];
+  }
   return "";
 }
 
 export function deleteCookie(name: string) {
   if (typeof window === 'undefined') return;
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  document.cookie = `${name}=; path=/; max-age=0`;
 }
+
 
 function saveUserToCookie(user: User) {
   if (typeof window === 'undefined') return;

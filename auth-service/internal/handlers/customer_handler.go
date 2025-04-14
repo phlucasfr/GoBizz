@@ -177,23 +177,13 @@ func (h *CustomerHandler) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	// Set cookie in the response
-	c.Cookie(&fiber.Cookie{
-		Name:     "auth-token",
-		Value:    token,
-		Expires:  time.Now().Add(30 * time.Minute),
-		HTTPOnly: false,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-	})
-
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"user": fiber.Map{
 			"id":    customer.ID,
 			"name":  customer.Name,
 			"email": customer.Email,
 		},
+		"token": token,
 	})
 }
 
@@ -228,19 +218,10 @@ func (h *CustomerHandler) RefreshToken(c *fiber.Ctx) error {
 		})
 	}
 
-	c.Cookie(&fiber.Cookie{
-		Name:     "auth-token",
-		Value:    newToken,
-		Expires:  time.Now().Add(30 * time.Minute),
-		HTTPOnly: false,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-	})
-
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Token refreshed successfully",
+		"token":   newToken,
 	})
 }
 
@@ -259,16 +240,6 @@ func (h *CustomerHandler) Logout(c *fiber.Ctx) error {
 	if err != nil {
 		log.Printf("Error blacklisting token: %v", err)
 	}
-
-	c.Cookie(&fiber.Cookie{
-		Name:     "auth-token",
-		Value:    "",
-		Expires:  time.Now().Add(-30 * time.Minute),
-		HTTPOnly: false,
-		Secure:   true,
-		SameSite: "Noneict",
-		Path:     "/",
-	})
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,

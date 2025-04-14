@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { deleteCookie, getCookie, useAuth } from "@/context/auth-context"
+import { deleteCookie, getCookie, getToken, useAuth } from "@/context/auth-context"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { usePathname } from "next/navigation"
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -57,7 +57,7 @@ export default function DashboardSidebar() {
 
   useEffect(() => {
     const checkSession = () => {
-      const token = getCookie("auth-token")
+      const token = getToken("auth-token")
       if (token) {
         const { exp } = JSON.parse(atob(token.split(".")[1]))
         const timeLeft = exp - Math.floor(Date.now() / 1000)
