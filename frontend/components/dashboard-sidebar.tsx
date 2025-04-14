@@ -94,9 +94,11 @@ export default function DashboardSidebar() {
     }
 
     window.addEventListener("click", handleUserInteraction)
+    window.addEventListener("touchstart", handleUserInteraction)
 
     return () => {
       window.removeEventListener("click", handleUserInteraction)
+      window.removeEventListener("touchstart", handleUserInteraction)
     }
   }, [sessionTime, refreshSession])
 
