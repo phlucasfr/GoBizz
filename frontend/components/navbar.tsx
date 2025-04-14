@@ -43,10 +43,10 @@ export default function Navbar() {
 
           {/* Desktop Navigation - Hidden on mobile */}
           <nav className="hidden lg:flex items-center space-x-6">
-            <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About Us
             </Link>
-            <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
               Contact
             </Link>
           </nav>
@@ -95,14 +95,14 @@ export default function Navbar() {
           <div className="container mx-auto px-4 py-4 space-y-4">
             <nav className="flex flex-col space-y-4">
               <Link
-                href="/"
+                href="/about"
                 className="text-sm font-medium hover:text-primary transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 About Us
               </Link>
               <Link
-                href="/"
+                href="/contact"
                 className="text-sm font-medium hover:text-primary transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
