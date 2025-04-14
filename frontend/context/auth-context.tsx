@@ -63,7 +63,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (token) {
         try {
-          const userData = getToken("user-data")
+          const userData = getCookie("user-data")
+          if (!userData) {
+            throw new Error("No user data found")
+          }
           const user = JSON.parse(userData)
 
           const decodedToken = jwtDecode<{ exp: number }>(token)
