@@ -20,25 +20,18 @@ var (
 	ConfigInstance Config
 )
 
-func getEnvWithDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
-}
-
 func LoadEnvInstance() {
 	log.Println("Loading environment variables...")
 
 	ConfigInstance = Config{
-		DBSource:        getEnvWithDefault("DB_SOURCE", "postgresql://postgres:postgres@localhost:5432/gobizz?sslmode=disable"),
-		MasterKey:       getEnvWithDefault("MASTER_KEY", "j8Lr5a2W9cX3pZb7Nq4eK6dF1gHtR0mU"),
-		RedisPort:       getEnvWithDefault("REDIS_PORT", "6379"),
-		RedisHost:       getEnvWithDefault("REDIS_HOST", "localhost"),
-		AllowedOrigins:  getEnvWithDefault("ALLOWED_ORIGINS", "http://localhost,http://127.0.0.1,http://localhost:5173,http://localhost:3000"),
-		FrontendSource:  getEnvWithDefault("FRONTEND_SOURCE", "http://localhost:5173"),
+		DBSource:        os.Getenv("DB_SOURCE"),
+		MasterKey:       os.Getenv("MASTER_KEY"),
+		RedisPort:       os.Getenv("REDIS_PORT"),
+		RedisHost:       os.Getenv("REDIS_HOST"),
+		AllowedOrigins:  os.Getenv("ALLOWED_ORIGINS"),
+		FrontendSource:  os.Getenv("FRONTEND_SOURCE"),
 		SendGridApiKey:  os.Getenv("SENDGRID_API_KEY"),
-		LinksServiceUrl: getEnvWithDefault("LINKS_SERVICE_URL", "localhost:50051"),
+		LinksServiceUrl: os.Getenv("LINKS_SERVICE_URL"),
 	}
 
 	log.Printf("Configuration loaded successfully:")
