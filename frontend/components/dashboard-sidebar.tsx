@@ -47,6 +47,7 @@ export default function DashboardSidebar() {
       if (!user!.email) throw new Error("User email not found")
 
       await refreshSession(user!.id, user!.email)
+      window.location.reload()
     } catch (error) {
       console.error("Failed to refresh session:", error)
       deleteCookie('user-data')
