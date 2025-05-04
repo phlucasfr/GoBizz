@@ -41,12 +41,6 @@ The project is organized into the following main services:
 - Developed in Go
 - Manages business links and connections
 - Uses gRPC for service communication
-- Directory structure:
-  - `/cmd` - Application entry points
-  - `/internal` - Service internal code
-  - `/migrations` - Database migrations
-  - `/proto` - gRPC protocol definitions
-  - `/utils` - Utility functions
 
 ### Project Configuration (`/project`)
 
@@ -169,6 +163,7 @@ make server
 - gRPC (Service Communication)
 - Protocol Buffers
 - PostgreSQL (Database)
+- DynamoDB (Links)
 - Redis (Caching)
 - SQLC (SQL Query Generation)
 - JWT (Authentication)
