@@ -20,6 +20,9 @@ server:
 	go run cmd/main.go
 
 proto:
-	protoc --go_out=internal/infra/grpc/links/pb --go_opt=paths=source_relative --go-grpc_out=internal/infra/grpc/links/pb --go-grpc_opt=paths=source_relative proto/links.proto
+	protoc \
+		--go_out=internal/infra/grpc/links/pb --go_opt=paths=source_relative \
+		--go-grpc_out=internal/infra/grpc/links/pb --go-grpc_opt=paths=source_relative \
+		proto/links_read.proto proto/links_write.proto
 
 .PHONY: createdb, dropdb, migrateup, migratedown, sqlc, test, server, proto

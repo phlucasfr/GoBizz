@@ -18,7 +18,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: redis
-    command: redis-server --save 20 1 --loglevel warning --maxmemory 512mb --maxmemory-policy allkeys-lru
+    command: redis-server --save 20 1 --loglevel warning --maxmemory 512mb --maxmemory-policy allkeys-lfu
     volumes:
       - redis_data:/data
     ports:
@@ -32,6 +32,31 @@ services:
       timeout: 5s
       retries: 3
 
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb_data:/home/dynamodblocal/data # Caminho ajustado
+    networks:
+      - app-network
+    restart: unless-stopped
+    command:
+      [
+        "-jar",
+        "DynamoDBLocal.jar",
+        "-sharedDb",
+        "-dbPath",
+        "/home/dynamodblocal/data",
+      ]
+    user: "root" # Garante permissões de escrita
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/shell"] # Endpoint correto
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
 networks:
   app-network:
     driver: bridge
@@ -42,4 +67,6 @@ volumes:
   redis_data:
     driver: local
   rabbitmq_data:
+    driver: local
+  dynamodb_data:
     driver: local

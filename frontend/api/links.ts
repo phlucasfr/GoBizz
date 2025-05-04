@@ -22,6 +22,7 @@ export interface CreateLinkRequest {
 
 export interface UpdateLinkRequest {
     id: string;
+    customer_id: string;
     custom_slug?: string;
     original_url?: string;
     expiration_date?: string;

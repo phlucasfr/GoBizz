@@ -260,6 +260,7 @@ export default function LinksPage() {
     try {
       const response = await linksApi.updateLink({
         id: editingLink.id,
+        customer_id: userSet?.id || "",
         original_url: editLongUrl,
         custom_slug: editCustomSlug || undefined,
         expiration_date: editExpirationDate ? formatDateForBackend(editExpirationDate) : undefined,

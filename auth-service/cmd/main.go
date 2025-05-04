@@ -7,19 +7,39 @@ import (
 	"auth-service/internal/infra/grpc/links"
 	"auth-service/internal/infra/repository"
 	"auth-service/internal/infra/server"
+	"auth-service/internal/logger"
 	"auth-service/utils"
 	"context"
-	"log"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 )
+
+func init() {
+	logger.Initialize(os.Getenv("ENVIRONMENT"))
+	loadEnvironment()
+}
+
+func loadEnvironment() {
+	if os.Getenv("ENVIRONMENT") == "production" {
+		return
+	}
+
+	if err := godotenv.Load(); err != nil {
+		logger.Log.Fatal("Failed to load .env file",
+			zap.Error(err),
+			zap.String("component", "config"),
+		)
+	}
+
+	utils.LoadEnvInstance()
+}
 
 func initPostgres() (*pgxpool.Pool, error) {
 	db, err := database.NewPostgresConnection()
@@ -37,55 +57,40 @@ func initRedis() (*redis.Client, error) {
 	return rdb, nil
 }
 
-func init() {
-	err := godotenv.Load()
-	if err != nil && os.Getenv("ENVIRONMENT") != "production" {
-		currentDir, err := os.Getwd()
-		if err != nil {
-			log.Fatalf("error getting current directory: %v", err)
-		}
-
-		envPath := filepath.Join(currentDir, ".env")
-		log.Printf("Attempting to load .env from: %s", envPath)
-
-		err = godotenv.Load(envPath)
-		if err != nil {
-			log.Fatalf("error during loading .env: %v", err)
-		}
-	}
-
-	utils.LoadEnvInstance()
-}
-
 func main() {
-	logger := log.New(os.Stdout, "[AUTH-SERVICE] ", log.LstdFlags|log.Lshortfile)
-
-	logger.Println("Starting auth service...")
+	logger.Log.Info("Starting auth service...")
 
 	db, err := initPostgres()
 	if err != nil {
-		logger.Fatalf("Failed to connect to database: %v", err)
+		logger.Log.Fatal("Failed to connect to PostgreSQL", zap.Error(err))
 	}
 	defer db.Close()
-	logger.Println("Successfully connected to PostgreSQL")
+	logger.Log.Info("Successfully connected to PostgreSQL")
 
 	rdb, err := initRedis()
 	if err != nil {
-		logger.Fatalf("Failed to connect to Redis: %v", err)
+		logger.Log.Fatal("Failed to connect to Redis", zap.Error(err))
 	}
-	logger.Println("Successfully connected to Redis")
+	logger.Log.Info("Successfully connected to Redis")
 
-	linksClient, err := links.NewClient(utils.ConfigInstance.LinksServiceUrl)
+	linksClientRead, err := links.NewClient()
 	if err != nil {
-		logger.Fatalf("Failed to connect to links service: %v", err)
+		logger.Log.Fatal("Failed to connect to links read service", zap.Error(err))
 	}
-	defer linksClient.Close()
-	logger.Println("Successfully connected to links service")
+	defer linksClientRead.CloseRead()
+	logger.Log.Info("Successfully connected to links read service")
+
+	linksClientWrite, err := links.NewClient()
+	if err != nil {
+		logger.Log.Fatal("Failed to connect to links write service", zap.Error(err))
+	}
+	defer linksClientWrite.CloseWrite()
+	logger.Log.Info("Successfully connected to links write service")
 
 	customerRepo := repository.NewCustomerRepository(db, rdb)
 	customerHandler := handlers.NewCustomerHandler(customerRepo)
 
-	linksHandler := handlers.NewLinksHandler(linksClient)
+	linksHandler := handlers.NewLinksHandler(linksClientWrite, linksClientRead)
 
 	app := server.InitFiber(customerHandler, linksHandler, rdb)
 
@@ -93,25 +98,25 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		logger.Println("Server starting on port :3000")
+		logger.Log.Info("Server starting on port :3000")
 		if err := app.Listen(":3000"); err != nil {
-			logger.Fatalf("Server failed to start: %v", err)
+			logger.Log.Fatal("Server failed to start", zap.Error(err))
 		}
 	}()
 
 	<-quit
-	logger.Println("Shutting down server...")
+	logger.Log.Info("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := rdb.Close(); err != nil {
-		logger.Printf("Error closing Redis connection: %v", err)
+		logger.Log.Error("Error closing Redis connection", zap.Error(err))
 	}
 
 	if err := app.ShutdownWithContext(ctx); err != nil {
-		logger.Fatalf("Server forced to shutdown: %v", err)
+		logger.Log.Fatal("Server forced to shutdown", zap.Error(err))
 	}
 
-	logger.Println("Server gracefully stopped")
+	logger.Log.Info("Server gracefully stopped")
 }

@@ -11,12 +11,14 @@ import (
 )
 
 type LinksHandler struct {
-	linksClient *links.Client
+	linksClientWrite *links.Client
+	linksClientRead  *links.Client
 }
 
-func NewLinksHandler(linksClient *links.Client) *LinksHandler {
+func NewLinksHandler(linksClientWrite *links.Client, linksClientRead *links.Client) *LinksHandler {
 	return &LinksHandler{
-		linksClient: linksClient,
+		linksClientWrite: linksClientWrite,
+		linksClientRead:  linksClientRead,
 	}
 }
 
@@ -65,7 +67,7 @@ func (h *LinksHandler) GetCustomerLinksHTTP(c *fiber.Ctx) error {
 	customerId := c.Params("customerId")
 	if customerId == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "customer_id is required",
+			"GetCustomerLinksHTTP error": "customer_id is required",
 		})
 	}
 
@@ -193,7 +195,7 @@ func (h *LinksHandler) CreateLink(ctx context.Context, req *proto.CreateLinkRequ
 		return nil, errors.New("original_url is required")
 	}
 
-	resp, err := h.linksClient.CreateLink(ctx, req)
+	resp, err := h.linksClientWrite.CreateLink(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +208,7 @@ func (h *LinksHandler) GetLink(ctx context.Context, req *proto.GetLinkRequest) (
 		return nil, errors.New("short_url is required")
 	}
 
-	resp, err := h.linksClient.GetLink(ctx, req)
+	resp, err := h.linksClientRead.GetLink(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +221,7 @@ func (h *LinksHandler) GetCustomerLinks(ctx context.Context, req *proto.GetCusto
 		return nil, errors.New("customer_id is required")
 	}
 
-	resp, err := h.linksClient.GetCustomerLinks(ctx, req)
+	resp, err := h.linksClientRead.GetCustomerLinks(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +237,7 @@ func (h *LinksHandler) DeleteLink(ctx context.Context, req *proto.DeleteLinkRequ
 		return nil, errors.New("customer_id is required")
 	}
 
-	resp, err := h.linksClient.DeleteLink(ctx, req)
+	resp, err := h.linksClientWrite.DeleteLink(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +254,11 @@ func (h *LinksHandler) UpdateLink(ctx context.Context, req *proto.UpdateLinkRequ
 		return nil, errors.New("original_url is required")
 	}
 
-	resp, err := h.linksClient.UpdateLink(ctx, req)
+	if req.CustomerId == "" {
+		return nil, errors.New("auth service - customer_id is required")
+	}
+
+	resp, err := h.linksClientWrite.UpdateLink(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -265,7 +271,7 @@ func (h *LinksHandler) UpdateLinkClicks(ctx context.Context, req *proto.UpdateLi
 		return nil, errors.New("id is required")
 	}
 
-	resp, err := h.linksClient.UpdateLinkClicks(ctx, req)
+	resp, err := h.linksClientWrite.UpdateLinkClicks(ctx, req)
 	if err != nil {
 		return nil, err
 	}

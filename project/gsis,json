@@ -1,0 +1,17 @@
+[
+  {
+    "IndexName":"ByCustomSlug",
+    "KeySchema":[{"AttributeName":"custom_slug","KeyType":"HASH"}],
+    "Projection":{"ProjectionType":"ALL"},
+    "ProvisionedThroughput":{"ReadCapacityUnits":2,"WriteCapacityUnits":2}
+  },
+  {
+    "IndexName":"ByCustomer",
+    "KeySchema":[
+      {"AttributeName":"customer_id","KeyType":"HASH"},
+      {"AttributeName":"created_at","KeyType":"RANGE"}
+    ],
+    "Projection":{"ProjectionType":"ALL"},
+    "ProvisionedThroughput":{"ReadCapacityUnits":2,"WriteCapacityUnits":2}
+  }
+]
