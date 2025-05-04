@@ -28,6 +28,7 @@ func init() {
 
 func loadEnvironment() {
 	if os.Getenv("ENVIRONMENT") == "production" {
+		utils.LoadEnvInstance()
 		return
 	}
 
