@@ -284,7 +284,7 @@ func (h *CustomerHandler) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	token, err := utils.GenerateJWT(customer.ID.String(), customer.Email)
+	token, err := utils.GenerateJWT(customer.ID.String(), customer.Email, c.IP(), c.Get("User-Agent"))
 	if err != nil {
 		logger.Log.Error("Failed to generate token", zap.Error(err))
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -346,7 +346,7 @@ func (h *CustomerHandler) RefreshToken(c *fiber.Ctx) error {
 		})
 	}
 
-	newToken, err := utils.GenerateJWT(req.ID.String(), req.Email)
+	newToken, err := utils.GenerateJWT(req.ID.String(), req.Email, c.IP(), c.Get("User-Agent"))
 	if err != nil {
 		logger.Log.Error("Failed to generate new token", zap.Error(err))
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -389,7 +389,7 @@ func (h *CustomerHandler) Logout(c *fiber.Ctx) error {
 	token = strings.TrimPrefix(token, "Bearer ")
 
 	tokenKey := fmt.Sprintf("blacklisted-token:%s", token)
-	err := h.repo.BlacklistToken(c.Context(), tokenKey, 24*time.Hour)
+	err := h.repo.BlacklistToken(c.Context(), tokenKey, 24*time.Hour*3)
 	if err != nil {
 		logger.Log.Error("Failed to blacklist token", zap.Error(err))
 	}

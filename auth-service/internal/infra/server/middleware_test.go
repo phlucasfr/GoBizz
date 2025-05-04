@@ -8,10 +8,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/require"
 )
 
@@ -84,53 +82,5 @@ func TestEncryptionMiddleware(t *testing.T) {
 		defer resp.Body.Close()
 
 		require.Equal(t, fiber.StatusOK, resp.StatusCode, "Should handle empty body")
-	})
-}
-
-func TestJWTMiddleware(t *testing.T) {
-	app := fiber.New()
-	masterKey := "01234567890123456789012345678901"
-
-	app.Use(JWTMiddleware())
-	app.Get("/test", func(c *fiber.Ctx) error {
-		return c.SendStatus(fiber.StatusOK)
-	})
-
-	t.Run("Valid Token", func(t *testing.T) {
-		token, err := utils.GenerateJWT("123", masterKey)
-		require.NoError(t, err, "Expected no error generating the token")
-		req := httptest.NewRequest("GET", "/test", nil)
-		req.Header.Set("Authorization", token)
-
-		resp, err := app.Test(req)
-		require.NoError(t, err, "Expected no error executing the request")
-		require.Equal(t, fiber.StatusOK, resp.StatusCode, "Expected status OK for a valid token")
-	})
-
-	t.Run("Invalid Token", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/test", nil)
-		req.Header.Set("Authorization", "invalid_token")
-
-		resp, err := app.Test(req)
-		require.NoError(t, err, "Expected no error executing the request")
-		require.Equal(t, fiber.StatusUnauthorized, resp.StatusCode, "Expected status Unauthorized for an invalid token")
-	})
-
-	t.Run("Expired Token", func(t *testing.T) {
-		// Create an expired token manually using jwt.RegisteredClaims
-		claims := jwt.RegisteredClaims{
-			Subject:   "123",
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(-1 * time.Hour)),
-		}
-		tokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		expiredToken, err := tokenObj.SignedString([]byte(masterKey))
-		require.NoError(t, err, "Expected no error generating an expired token")
-
-		req := httptest.NewRequest("GET", "/test", nil)
-		req.Header.Set("Authorization", expiredToken)
-
-		resp, err := app.Test(req)
-		require.NoError(t, err, "Expected no error executing the request")
-		require.Equal(t, fiber.StatusUnauthorized, resp.StatusCode, "Expected status Unauthorized for an expired token")
 	})
 }

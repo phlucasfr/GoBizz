@@ -11,7 +11,9 @@ import (
 func TestJWTClaims(t *testing.T) {
 	masterKey := ConfigInstance.MasterKey
 	t.Run("Properly verifies expiration", func(t *testing.T) {
-		token, _ := GenerateJWT("testUser", masterKey)
+		ip := "127.0.0.1"
+		userAgent := "Mozilla/5.0"
+		token, _ := GenerateJWT("testUser", "testEmail@example.com", ip, userAgent)
 
 		parsedToken, _ := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 			return masterKey, nil
@@ -38,6 +40,7 @@ func TestValidateJWT(t *testing.T) {
 		claims := JWTClaims{
 			UserID: "expiredUser",
 			Email:  "test@example.com",
+			IpHash: "expiredIpHash",
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(-1 * time.Hour)),
 			},
@@ -59,5 +62,27 @@ func TestValidateJWT(t *testing.T) {
 
 		_, err := ValidateJWT(tokenString)
 		require.Error(t, err)
+	})
+
+	t.Run("Valid token", func(t *testing.T) {
+		claims := JWTClaims{
+			UserID: "validUser",
+			Email:  "valid@example.com",
+			IpHash: ComputeIpHash("127.0.0.1", "Mozilla/5.0"),
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
+				IssuedAt:  jwt.NewNumericDate(time.Now()),
+				NotBefore: jwt.NewNumericDate(time.Now()),
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenString, _ := token.SignedString([]byte(masterKey))
+
+		validatedClaims, err := ValidateJWT(tokenString)
+		require.NoError(t, err)
+		require.NotNil(t, validatedClaims)
+		require.Equal(t, claims.UserID, validatedClaims.UserID)
+		require.Equal(t, claims.Email, validatedClaims.Email)
+		require.Equal(t, claims.IpHash, validatedClaims.IpHash)
 	})
 }

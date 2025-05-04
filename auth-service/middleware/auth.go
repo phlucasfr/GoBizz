@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 )
 
 // AuthMiddleware is a middleware function for the Fiber framework that handles
@@ -73,6 +74,15 @@ func AuthMiddleware(rdb *redis.Client) fiber.Handler {
 			logger.Log.Error("Invalid or expired token")
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Invalid or expired token",
+			})
+		}
+
+		ip := c.IP()
+		ua := c.Get("User-Agent")
+		if utils.ComputeIpHash(ip, ua) != claims.IpHash {
+			logger.Log.Warn("IP/User-Agent mismatch on token", zap.String("ip", ip), zap.String("ua", ua))
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Invalid token context",
 			})
 		}
 

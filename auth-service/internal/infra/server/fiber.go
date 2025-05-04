@@ -3,6 +3,7 @@ package server
 import (
 	"auth-service/internal/handlers"
 	"auth-service/utils"
+	"os"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
@@ -41,8 +42,23 @@ func InitFiber(customerHandler *handlers.CustomerHandler, linksHandler *handlers
 		ExposeHeaders:    "Content-Length",
 	}))
 
-	app.Use(logger.New())
 	app.Use(recover.New())
+
+	if os.Getenv("ENVIRONMENT") == "production" {
+		app.Use(func(c *fiber.Ctx) error {
+			if c.Protocol() == "http" {
+				return c.Redirect("https://"+c.Hostname()+c.OriginalURL(), fiber.StatusPermanentRedirect)
+			}
+			return c.Next()
+		})
+
+		app.Use(func(c *fiber.Ctx) error {
+			c.Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+			return c.Next()
+		})
+	}
+
+	app.Use(logger.New())
 	app.Use(EncryptionMiddleware())
 
 	setupRoutes(app, customerHandler, linksHandler, rdb)

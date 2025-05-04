@@ -117,39 +117,3 @@ func encryptResponse(c *fiber.Ctx, key string) error {
 	logger.Log.Info("Response body encrypted successfully")
 	return nil
 }
-
-// JWTMiddleware is a middleware function for the Fiber framework that validates
-// JSON Web Tokens (JWT) from the "Authorization" header of incoming requests.
-//
-// If the token is not provided or is invalid, the middleware responds with a
-// 401 Unauthorized status and an appropriate error message in JSON format.
-//
-// Upon successful validation, the middleware extracts the user ID from the token
-// and stores it in the request's local context under the key "userID", allowing
-// subsequent handlers to access it.
-//
-// Returns:
-//   - A Fiber handler function to be used as middleware.
-func JWTMiddleware() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		token := c.Get("Authorization")
-		if token == "" {
-			logger.Log.Error("Authorization token not provided")
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Token not provided",
-			})
-		}
-
-		userID, err := utils.ValidateJWT(token)
-		if err != nil {
-			logger.Log.Error("Invalid token", zap.Error(err))
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid token",
-			})
-		}
-
-		c.Locals("userID", userID)
-		logger.Log.Info("Token validated successfully", zap.String("userID", userID.UserID))
-		return c.Next()
-	}
-}
