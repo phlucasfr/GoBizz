@@ -32,10 +32,6 @@ func NewDynamoClient() (*dynamodb.Client, error) {
 
 	ctx := context.Background()
 	endpoint := utils.ConfigInstance.DynamoEndpoint
-	if endpoint == "" {
-		logger.Log.Error("Failed to create DynamoDB client: DYNAMODB_ENDPOINT is not set")
-		return nil, fmt.Errorf("DYNAMODB_ENDPOINT is not set")
-	}
 
 	if os.Getenv("ENVIRONMENT") == "production" {
 		cfg, err = config.LoadDefaultConfig(ctx,
