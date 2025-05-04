@@ -1,6 +1,6 @@
 import { ApiError } from './types';
 
-const CUSTOM_SLUG_ERROR = 'rpc error: code = Unknown desc = custom slug already exists';
+const CUSTOM_SLUG_ERROR = 'rpc error: code = AlreadyExists desc = custom slug already exists';
 const UNKNOWN_ERROR_PREFIX = 'rpc error: code = Unknown desc =';
 const UNAUTHORIZED_ERROR = 'Authorization header is required';
 
