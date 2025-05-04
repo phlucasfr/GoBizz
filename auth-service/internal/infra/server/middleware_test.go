@@ -1,10 +1,12 @@
 package server
 
 import (
+	"auth-service/internal/logger"
 	"auth-service/utils"
 	"bytes"
 	"encoding/json"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
@@ -15,6 +17,13 @@ import (
 
 type testResponse struct {
 	Message string `json:"message"`
+}
+
+func TestMain(m *testing.M) {
+	logger.Initialize("development")
+	code := m.Run()
+	logger.Sync()
+	os.Exit(code)
 }
 
 func TestEncryptionMiddleware(t *testing.T) {

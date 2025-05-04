@@ -1,12 +1,21 @@
 package cache
 
 import (
+	"auth-service/internal/logger"
 	"context"
+	"os"
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/stretchr/testify/require"
 )
+
+func TestMain(m *testing.M) {
+	logger.Initialize("development")
+	code := m.Run()
+	logger.Sync()
+	os.Exit(code)
+}
 
 // TestNewRedisClient_Success starts a fake Redis server using miniredis
 func TestNewRedisClient_Success(t *testing.T) {
