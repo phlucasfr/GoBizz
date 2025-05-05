@@ -5,6 +5,8 @@ import (
 	"auth-service/utils"
 	"os"
 
+	json "github.com/goccy/go-json"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -25,8 +27,10 @@ import (
 //   - *fiber.App: A fully configured Fiber application instance ready to start serving requests.
 func InitFiber(customerHandler *handlers.CustomerHandler, linksHandler *handlers.LinksHandler, rdb *redis.Client) *fiber.App {
 	app := fiber.New(fiber.Config{
-		AppName: "auth-service API",
-		Prefork: false,
+		AppName:     "auth-service API",
+		JSONEncoder: json.Marshal,
+		JSONDecoder: json.Unmarshal,
+		Prefork:     false,
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
