@@ -10,7 +10,20 @@ import { linksApi, type Link } from "@/api/links"
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Link2, Copy, Trash2, ExternalLink, CheckCircle, RefreshCw, Pencil, Search, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react"
+import {
+  Link2,
+  Copy,
+  Trash2,
+  ExternalLink,
+  CheckCircle,
+  RefreshCw,
+  Pencil,
+  Search,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
 import {
   Dialog,
   DialogTitle,
@@ -19,13 +32,7 @@ import {
   DialogContent,
   DialogDescription,
 } from "@/components/ui/dialog"
-import {
-  Select,
-  SelectItem,
-  SelectValue,
-  SelectTrigger,
-  SelectContent,
-} from "@/components/ui/select"
+import { Select, SelectItem, SelectValue, SelectTrigger, SelectContent } from "@/components/ui/select"
 
 export default function LinksPage() {
   const { userSet } = useAuth()
@@ -54,8 +61,9 @@ export default function LinksPage() {
   const [editExpirationDate, setEditExpirationDate] = useState("")
 
   const fetchLinks = async () => {
-    if (!userSet?.id || isFetching.current) return
+    if (!userSet?.id) return
 
+    if (isFetching.current) return
     isFetching.current = true
     try {
       setIsLoading(true)
@@ -66,8 +74,8 @@ export default function LinksPage() {
         sort_by: sortField || undefined,
         sort_direction: sortDirection,
         search: searchQuery,
-        status: filterStatus !== 'all' ? filterStatus : undefined,
-        slug_type: filterSlugType !== 'all' ? filterSlugType : undefined
+        status: filterStatus !== "all" ? filterStatus : undefined,
+        slug_type: filterSlugType !== "all" ? filterSlugType : undefined,
       })
 
       if (response?.success && response?.data) {
@@ -76,7 +84,7 @@ export default function LinksPage() {
         setTotalItems(total || 0)
         setTotalPages(Math.ceil((total || 0) / itemsPerPage))
       } else {
-        console.warn('Invalid response format:', response)
+        console.warn("Invalid response format:", response)
         setLinks([])
         setTotalItems(0)
         setTotalPages(0)
@@ -95,13 +103,13 @@ export default function LinksPage() {
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      if (userSet?.id && !isFetching.current) {
+      if (userSet?.id) {
         fetchLinks()
       }
     }, 300)
 
     return () => clearTimeout(debounceTimer)
-  }, [currentPage, sortField, sortDirection, searchQuery, filterStatus, filterSlugType])
+  }, [userSet?.id, currentPage, sortField, sortDirection, searchQuery, filterStatus, filterSlugType])
 
   const validateUrl = (url: string) => {
     try {
@@ -164,8 +172,10 @@ export default function LinksPage() {
     } catch (error: any) {
       console.error("Error creating link:", error)
 
-      if (error?.message?.includes("custom slug already exists") ||
-        error?.message?.includes("rpc error: code = Unknown desc = custom slug already exists")) {
+      if (
+        error?.message?.includes("custom slug already exists") ||
+        error?.message?.includes("rpc error: code = Unknown desc = custom slug already exists")
+      ) {
         toast.error("This custom URL is already taken. Please choose a different one.")
       } else {
         toast.error("Failed to create link. Please try again.")
@@ -189,7 +199,7 @@ export default function LinksPage() {
     try {
       const response = await linksApi.deleteLink(id)
       if (response.success) {
-        setLinks(prevLinks => prevLinks.filter((link) => link.id !== id))
+        setLinks((prevLinks) => prevLinks.filter((link) => link.id !== id))
         toast.success("Link deleted successfully")
       } else {
         toast.error(response.message || "Failed to delete link")
@@ -350,7 +360,9 @@ export default function LinksPage() {
                   />
                 </div>
                 {customSlug && !validateCustomSlug(customSlug) && (
-                  <p className="text-sm text-red-500 mt-1">Only letters, numbers, underscores, and hyphens are allowed</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    Only letters, numbers, underscores, and hyphens are allowed
+                  </p>
                 )}
               </div>
 
@@ -367,7 +379,12 @@ export default function LinksPage() {
 
               <Button
                 onClick={handleShortenLink}
-                disabled={!longUrl || isShortening || !validateUrl(longUrl) || (customSlug ? !validateCustomSlug(customSlug) : false)}
+                disabled={
+                  !longUrl ||
+                  isShortening ||
+                  !validateUrl(longUrl) ||
+                  (customSlug ? !validateCustomSlug(customSlug) : false)
+                }
                 className="w-full md:w-auto md:self-end"
               >
                 {isShortening ? (
@@ -428,10 +445,13 @@ export default function LinksPage() {
                     className="pl-9 w-[200px]"
                   />
                 </div>
-                <Select value={filterStatus} onValueChange={(value: "all" | "active" | "expired") => {
-                  setFilterStatus(value)
-                  setCurrentPage(1)
-                }}>
+                <Select
+                  value={filterStatus}
+                  onValueChange={(value: "all" | "active" | "expired") => {
+                    setFilterStatus(value)
+                    setCurrentPage(1)
+                  }}
+                >
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
@@ -441,10 +461,13 @@ export default function LinksPage() {
                     <SelectItem value="expired">Expired</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={filterSlugType} onValueChange={(value: "all" | "custom" | "auto") => {
-                  setFilterSlugType(value)
-                  setCurrentPage(1)
-                }}>
+                <Select
+                  value={filterSlugType}
+                  onValueChange={(value: "all" | "custom" | "auto") => {
+                    setFilterSlugType(value)
+                    setCurrentPage(1)
+                  }}
+                >
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Slug Type" />
                   </SelectTrigger>
@@ -454,12 +477,7 @@ export default function LinksPage() {
                     <SelectItem value="auto">Auto</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={fetchLinks}
-                  title="Refresh links"
-                >
+                <Button variant="outline" size="icon" onClick={fetchLinks} title="Refresh links">
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </div>
@@ -479,11 +497,12 @@ export default function LinksPage() {
                     >
                       <div className="flex items-center">
                         Original URL
-                        {sortField === "original_url" && (
-                          sortDirection === "asc" ?
-                            <ArrowUp className="ml-1 h-4 w-4" /> :
+                        {sortField === "original_url" &&
+                          (sortDirection === "asc" ? (
+                            <ArrowUp className="ml-1 h-4 w-4" />
+                          ) : (
                             <ArrowDown className="ml-1 h-4 w-4" />
-                        )}
+                          ))}
                       </div>
                     </TableHead>
                     <TableHead>Shortened URL</TableHead>
@@ -496,11 +515,12 @@ export default function LinksPage() {
                     >
                       <div className="flex items-center justify-center">
                         Clicks
-                        {sortField === "clicks" && (
-                          sortDirection === "asc" ?
-                            <ArrowUp className="ml-1 h-4 w-4" /> :
+                        {sortField === "clicks" &&
+                          (sortDirection === "asc" ? (
+                            <ArrowUp className="ml-1 h-4 w-4" />
+                          ) : (
                             <ArrowDown className="ml-1 h-4 w-4" />
-                        )}
+                          ))}
                       </div>
                     </TableHead>
                     <TableHead
@@ -512,11 +532,12 @@ export default function LinksPage() {
                     >
                       <div className="flex items-center">
                         Created
-                        {sortField === "created_at" && (
-                          sortDirection === "asc" ?
-                            <ArrowUp className="ml-1 h-4 w-4" /> :
+                        {sortField === "created_at" &&
+                          (sortDirection === "asc" ? (
+                            <ArrowUp className="ml-1 h-4 w-4" />
+                          ) : (
                             <ArrowDown className="ml-1 h-4 w-4" />
-                        )}
+                          ))}
                       </div>
                     </TableHead>
                     <TableHead
@@ -528,11 +549,12 @@ export default function LinksPage() {
                     >
                       <div className="flex items-center">
                         Expires
-                        {sortField === "expiration_date" && (
-                          sortDirection === "asc" ?
-                            <ArrowUp className="ml-1 h-4 w-4" /> :
+                        {sortField === "expiration_date" &&
+                          (sortDirection === "asc" ? (
+                            <ArrowUp className="ml-1 h-4 w-4" />
+                          ) : (
                             <ArrowDown className="ml-1 h-4 w-4" />
-                        )}
+                          ))}
                       </div>
                     </TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -577,9 +599,7 @@ export default function LinksPage() {
                           {link.expiration_date ? (
                             <div className="flex items-center gap-2">
                               {formatDate(link.expiration_date)}
-                              {isLinkExpired(link) && (
-                                <span className="text-xs text-red-500">(Expired)</span>
-                              )}
+                              {isLinkExpired(link) && <span className="text-xs text-red-500">(Expired)</span>}
                             </div>
                           ) : (
                             <span className="text-muted-foreground">Never</span>
@@ -600,12 +620,7 @@ export default function LinksPage() {
                                 <Copy className="h-4 w-4" />
                               )}
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openEditModal(link)}
-                              title="Edit link"
-                            >
+                            <Button variant="ghost" size="icon" onClick={() => openEditModal(link)} title="Edit link">
                               <Pencil className="h-4 w-4" />
                             </Button>
                             <Button
@@ -630,8 +645,7 @@ export default function LinksPage() {
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
                   Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} to{" "}
-                  {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
-                  {totalItems} links
+                  {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} links
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -674,9 +688,7 @@ export default function LinksPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Link</DialogTitle>
-            <DialogDescription>
-              Update your shortened link's destination URL and custom slug
-            </DialogDescription>
+            <DialogDescription>Update your shortened link's destination URL and custom slug</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div>
@@ -722,12 +734,7 @@ export default function LinksPage() {
                   className="flex-1"
                 />
                 {editingLink?.expiration_date && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditExpirationDate("")}
-                    className="shrink-0"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setEditExpirationDate("")} className="shrink-0">
                     Remove expiration
                   </Button>
                 )}
@@ -740,7 +747,11 @@ export default function LinksPage() {
             </Button>
             <Button
               onClick={handleEditLink}
-              disabled={!editLongUrl || !validateUrl(editLongUrl) || (editCustomSlug ? !validateCustomSlug(editCustomSlug) : false)}
+              disabled={
+                !editLongUrl ||
+                !validateUrl(editLongUrl) ||
+                (editCustomSlug ? !validateCustomSlug(editCustomSlug) : false)
+              }
             >
               Save Changes
             </Button>
