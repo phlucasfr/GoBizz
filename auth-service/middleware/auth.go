@@ -77,7 +77,10 @@ func AuthMiddleware(rdb *redis.Client) fiber.Handler {
 			})
 		}
 
-		ip := c.IP()
+		ip := c.Get("CF-Connecting-IP")
+		if ip == "" {
+			ip = c.IP()
+		}
 		ua := c.Get("User-Agent")
 		if utils.ComputeIpHash(ip, ua) != claims.IpHash {
 			logger.Log.Warn("IP/User-Agent mismatch on token", zap.String("ip", ip), zap.String("ua", ua))
