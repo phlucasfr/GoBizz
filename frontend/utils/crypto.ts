@@ -1,5 +1,6 @@
 import nacl from 'tweetnacl';
-import { apiConfig } from '@/api/config';
+
+const MASTER_KEY = process.env.NEXT_PUBLIC_MASTER_KEY;
 
 export function decrypt(encrypted: any): string {
     let encryptedData: string;
@@ -28,7 +29,7 @@ export function decrypt(encrypted: any): string {
     const nonce = rawData.slice(0, 24);
     const ciphertext = rawData.slice(24);
 
-    const keyBytes = new TextEncoder().encode(apiConfig.masterKey);
+    const keyBytes = new TextEncoder().encode(MASTER_KEY);
     const decrypted = nacl.secretbox.open(ciphertext, nonce, keyBytes);
 
     if (!decrypted) {
@@ -49,7 +50,7 @@ function uint8ArrayToBase64(bytes: Uint8Array): string {
 }
 
 export function encrypt(data: string): string {
-    const keyBytes = new TextEncoder().encode(apiConfig.masterKey);
+    const keyBytes = new TextEncoder().encode(MASTER_KEY);
     const nonce = nacl.randomBytes(24);
     const ciphertext = nacl.secretbox(new TextEncoder().encode(data), nonce, keyBytes);
 

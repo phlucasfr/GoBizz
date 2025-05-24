@@ -1,6 +1,5 @@
 export const apiConfig = {
     baseUrl: process.env.NEXT_PUBLIC_AUTH_SERVICE_API,
-    masterKey: process.env.NEXT_PUBLIC_MASTER_KEY,
     endpoints: {
         auth: {
             logout: "/v1/auth/logout",
