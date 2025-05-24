@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"links-service-read/internal/logger"
 
+	pb "links-service-read/proto"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
@@ -169,27 +171,65 @@ func (r *LinksRepository) GetLinkByCustomSlug(ctx context.Context, customSlug st
 	return &link, nil
 }
 
-// GetCustomerLinks retrieves a list of links associated with a specific customer ID
-// from the DynamoDB table. The links are fetched in descending order based on their
-// creation time.
+// GetCustomerLinks retrieves a list of links associated with a specific customer from the DynamoDB table.
+// It supports optional filtering by status, slug type, and sorting direction, as well as limiting the number of results.
 //
 // Parameters:
 //   - ctx: The context for managing request deadlines and cancellations.
-//   - customerID: The unique identifier of the customer whose links are to be retrieved.
+//   - req: A pointer to a GetCustomerLinksRequest containing the customer ID and optional filters.
 //
 // Returns:
-//   - A slice of pointers to Link objects representing the customer's links.
+//   - A slice of pointers to Link objects representing the retrieved links.
 //   - An error if the query or unmarshalling process fails.
-func (r *LinksRepository) GetCustomerLinks(ctx context.Context, customerID string) ([]*Link, error) {
-	result, err := r.db.Query(ctx, &dynamodb.QueryInput{
+//
+// Filters:
+//   - Status: If provided, filters links by their status.
+//   - SlugType: If provided, filters links by their slug type.
+//   - SortDirection: Determines the sorting order of the results. Defaults to ascending if not specified or invalid.
+//   - Limit: Limits the number of results returned.
+//
+// Logs:
+//   - Logs an error if the query or unmarshalling fails.
+//   - Logs an informational message upon successful retrieval of links.
+func (r *LinksRepository) GetCustomerLinks(ctx context.Context, req *pb.GetCustomerLinksRequest) ([]*Link, error) {
+	input := &dynamodb.QueryInput{
 		TableName:              aws.String("Links"),
 		IndexName:              aws.String("ByCustomer"),
 		KeyConditionExpression: aws.String("customer_id = :customer"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":customer": &types.AttributeValueMemberS{Value: customerID},
+			":customer": &types.AttributeValueMemberS{Value: req.CustomerId},
 		},
-		ScanIndexForward: aws.Bool(false),
-	})
+		ScanIndexForward: aws.Bool(req.SortDirection == nil || *req.SortDirection != "desc"),
+	}
+
+	if req.Status != nil {
+		input.FilterExpression = aws.String("status = :status")
+		input.ExpressionAttributeValues[":status"] = &types.AttributeValueMemberS{Value: *req.Status}
+	}
+
+	if req.SlugType != nil {
+		expr := "slug_type = :slugType"
+		if input.FilterExpression != nil {
+			expr = fmt.Sprintf("(%s) AND (%s)", *input.FilterExpression, expr)
+		}
+		input.FilterExpression = aws.String(expr)
+		input.ExpressionAttributeValues[":slugType"] = &types.AttributeValueMemberS{Value: *req.SlugType}
+	}
+
+	if req.Search != nil {
+		searchExpr := fmt.Sprintf("contains(%s, :search)", "custom_slug")
+		if input.FilterExpression != nil {
+			searchExpr = fmt.Sprintf("(%s) AND (%s)", *input.FilterExpression, searchExpr)
+		}
+		input.FilterExpression = aws.String(searchExpr)
+		input.ExpressionAttributeValues[":search"] = &types.AttributeValueMemberS{Value: *req.Search}
+	}
+
+	if req.Limit != nil {
+		input.Limit = req.Limit
+	}
+
+	result, err := r.db.Query(ctx, input)
 	if err != nil {
 		logger.Log.Error("Failed to query links by customer", zap.Error(err))
 		return nil, fmt.Errorf("failed to query links by customer: %v", err)
@@ -205,6 +245,6 @@ func (r *LinksRepository) GetCustomerLinks(ctx context.Context, customerID strin
 		links = append(links, &link)
 	}
 
-	logger.Log.Info("Links retrieved successfully", zap.String("customer_id", customerID))
+	logger.Log.Info("Links retrieved successfully", zap.String("customer_id", req.CustomerId))
 	return links, nil
 }

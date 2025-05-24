@@ -130,7 +130,7 @@ func (s *GRPCServer) GetCustomerLinks(ctx context.Context, req *pb.GetCustomerLi
 		return nil, status.Error(codes.InvalidArgument, "customer_id is required")
 	}
 
-	links, err := s.repo.GetCustomerLinks(ctx, req.CustomerId)
+	links, err := s.repo.GetCustomerLinks(ctx, req)
 	if err != nil {
 		logger.Log.Error("failed to get customer links", zap.Error(err))
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get customer links: %v", err))
