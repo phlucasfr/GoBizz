@@ -14,7 +14,7 @@ export function decrypt(encrypted: any): string {
     } else if (typeof encrypted === 'object' && encrypted.Data) {
         encryptedData = encrypted.Data;
     } else {
-        throw new Error('Formato inválido dos dados de criptografia');
+        throw new Error('Invalid cryptography data format');
     }
 
     const cleanBase64 = encryptedData.replace(/[^A-Za-z0-9+/=]/g, '');
