@@ -13,7 +13,7 @@ function EmailVerificationContent() {
     const searchParams = useSearchParams();
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-    const [message, setMessage] = useState('Verificando seu e-mail...');
+    const [message, setMessage] = useState('Verifying your email...');
 
     useEffect(() => {
         const verifyEmail = async () => {
@@ -22,7 +22,7 @@ function EmailVerificationContent() {
 
                 if (!token) {
                     setStatus('error');
-                    setMessage('Token de verificação não encontrado.');
+                    setMessage('Verification token not found.');
                     return;
                 }
 
@@ -34,15 +34,15 @@ function EmailVerificationContent() {
 
                 if (!response.success) {
                     alert(response.message);
-                    throw new Error(response.message || 'Falha na verificação do e-mail');
+                    throw new Error(response.message || 'Email verification failed');
                 }
 
                 setStatus('success');
-                setMessage('E-mail verificado com sucesso! Agora você pode fazer login.');
+                setMessage('Email successfully verified! You can now log in.');
             } catch (error) {
-                console.error('Erro na verificação:', error);
+                console.error('Error during verification:', error);
                 setStatus('error');
-                setMessage('Erro na verificação do e-mail. O token pode ter expirado ou ser inválido.');
+                setMessage('Error verifying email. The token may have expired or be invalid.');
             }
         };
 
@@ -53,7 +53,7 @@ function EmailVerificationContent() {
         <div className="min-h-screen flex items-center justify-center p-4">
             <Card className="w-full max-w-md">
                 <CardHeader>
-                    <CardTitle className="text-center">Verificação de E-mail</CardTitle>
+                    <CardTitle className="text-center">Email Verification</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {status === 'loading' && (
@@ -67,7 +67,7 @@ function EmailVerificationContent() {
                         <div className="space-y-4">
                             <p className="text-center text-green-600">{message}</p>
                             <Button className="w-full" onClick={() => router.push('/login')}>
-                                Ir para Login
+                                Go to Login
                             </Button>
                         </div>
                     )}
