@@ -1,7 +1,5 @@
 # GoBizz - Business Management System
 
-## 📋 About the Project
-
 GoBizz is a modern business management system, built with a distributed architecture using microservices. The project consists of a Next.js frontend and multiple Go backend services communicating via gRPC.
 
 ## 🏗️ Project Architecture
