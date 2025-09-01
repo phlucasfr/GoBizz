@@ -25,7 +25,7 @@ import (
 //
 // Returns:
 //   - *fiber.App: A fully configured Fiber application instance ready to start serving requests.
-func InitFiber(customerHandler *handlers.CustomerHandler, linksHandler *handlers.LinksHandler, rdb *redis.Client) *fiber.App {
+func InitFiber(customerHandler *handlers.CustomerHandler, linksHandler *handlers.LinksHandler, eventsHandler *handlers.EventsHandler, rdb *redis.Client) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName:     "auth-service API",
 		JSONEncoder: json.Marshal,
@@ -65,6 +65,6 @@ func InitFiber(customerHandler *handlers.CustomerHandler, linksHandler *handlers
 	app.Use(logger.New())
 	app.Use(EncryptionMiddleware())
 
-	setupRoutes(app, customerHandler, linksHandler, rdb)
+	setupRoutes(app, customerHandler, linksHandler, eventsHandler, rdb)
 	return app
 }

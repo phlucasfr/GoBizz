@@ -38,7 +38,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - dynamodb_data:/home/dynamodblocal/data # Caminho ajustado
+      - dynamodb_data:/home/dynamodblocal/data
     networks:
       - app-network
     restart: unless-stopped
@@ -50,9 +50,9 @@ services:
         "-dbPath",
         "/home/dynamodblocal/data",
       ]
-    user: "root" # Garante permissões de escrita
+    user: "root"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/shell"] # Endpoint correto
+      test: ["CMD", "curl", "-f", "http://localhost:8000/shell"]
       interval: 5s
       timeout: 2s
       retries: 5

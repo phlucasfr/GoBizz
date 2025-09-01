@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Link2,
   LogOut,
+  Calendar1,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -27,6 +28,11 @@ const sidebarLinks = [
     href: "/dashboard/links",
     icon: Link2,
   },
+  {
+    name: "Events",
+    href: "/dashboard/events",
+    icon: Calendar1,
+  }
 ]
 
 export default function DashboardSidebar() {

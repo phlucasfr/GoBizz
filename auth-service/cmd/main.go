@@ -4,6 +4,7 @@ import (
 	"auth-service/internal/handlers"
 	"auth-service/internal/infra/cache"
 	"auth-service/internal/infra/database"
+	"auth-service/internal/infra/grpc/events"
 	"auth-service/internal/infra/grpc/links"
 	"auth-service/internal/infra/repository"
 	"auth-service/internal/infra/server"
@@ -88,12 +89,19 @@ func main() {
 	defer linksClientWrite.CloseWrite()
 	logger.Log.Info("Successfully connected to links write service")
 
+	eventsClient, err := events.NewClient()
+	if err != nil {
+		logger.Log.Fatal("Failed to connect to events service", zap.Error(err))
+	}
+	logger.Log.Info("Successfully connected to events service")
+
 	customerRepo := repository.NewCustomerRepository(db, rdb)
 	customerHandler := handlers.NewCustomerHandler(customerRepo)
 
 	linksHandler := handlers.NewLinksHandler(linksClientWrite, linksClientRead)
+	eventsHandler := handlers.NewEventsHandler(eventsClient)
 
-	app := server.InitFiber(customerHandler, linksHandler, rdb)
+	app := server.InitFiber(customerHandler, linksHandler, eventsHandler, rdb)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

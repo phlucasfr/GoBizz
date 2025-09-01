@@ -19,10 +19,16 @@ test:
 server:
 	go run cmd/main.go
 
-proto:
+proto-links:
 	protoc \
 		--go_out=internal/infra/grpc/links/pb --go_opt=paths=source_relative \
 		--go-grpc_out=internal/infra/grpc/links/pb --go-grpc_opt=paths=source_relative \
 		proto/links_read.proto proto/links_write.proto
+	
+proto-events:
+	protoc \
+		--go_out=internal/infra/grpc/events/pb --go_opt=paths=source_relative \
+		--go-grpc_out=internal/infra/grpc/events/pb --go-grpc_opt=paths=source_relative \
+		proto/events.proto
 
-.PHONY: createdb, dropdb, migrateup, migratedown, sqlc, test, server, proto
+.PHONY: createdb dropdb migrateup migratedown sqlc test server proto-links proto-events

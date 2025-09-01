@@ -58,3 +58,6 @@ ehthumbs.db
 
 # Linux generated files
 *~
+
+# Rust
+**/target

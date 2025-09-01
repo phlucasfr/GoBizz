@@ -13,6 +13,7 @@ type Config struct {
 	AllowedOrigins       string
 	FrontendSource       string
 	SendGridApiKey       string
+	EventsServiceURL     string
 	LinksServiceReadUrl  string
 	LinksServiceWriteUrl string
 }
@@ -32,6 +33,7 @@ func LoadEnvInstance() {
 		AllowedOrigins:       os.Getenv("ALLOWED_ORIGINS"),
 		FrontendSource:       os.Getenv("FRONTEND_SOURCE"),
 		SendGridApiKey:       os.Getenv("SENDGRID_API_KEY"),
+		EventsServiceURL:     os.Getenv("EVENTS_SERVICE_URL"),
 		LinksServiceReadUrl:  os.Getenv("LINKS_SERVICE_READ_URL"),
 		LinksServiceWriteUrl: os.Getenv("LINKS_SERVICE_WRITE_URL"),
 	}
