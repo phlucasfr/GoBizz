@@ -1,19 +1,16 @@
 "use client"
 
 import Link from "next/link"
-
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, FileText, Link2 } from "lucide-react"
+import { ArrowRight, CalendarDays, Link2 } from "lucide-react"
 
 export default function Home() {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+      transition: { staggerChildren: 0.1 },
     },
   }
 
@@ -22,11 +19,7 @@ export default function Home() {
     visible: {
       y: 0,
       opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15,
-      },
+      transition: { type: "spring", stiffness: 100, damping: 15 },
     },
   }
 
@@ -35,27 +28,17 @@ export default function Home() {
     visible: {
       scale: 1,
       opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15,
-        delay: 0.2,
-      },
+      transition: { type: "spring", stiffness: 100, damping: 15, delay: 0.2 },
     },
     hover: {
       y: -5,
       boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 10,
-      },
+      transition: { type: "spring", stiffness: 400, damping: 10 },
     },
   }
 
   return (
     <div className="flex min-h-screen flex-col">
-
       <main className="flex-1">
         <motion.section
           className="py-20 md:py-28 text-center px-4"
@@ -70,7 +53,10 @@ export default function Home() {
             Transform Your Business Management
           </motion.h1>
 
-          <motion.p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10" variants={itemVariants}>
+          <motion.p
+            className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10"
+            variants={itemVariants}
+          >
             Discover intelligent tools and complete resources to drive your business success.
           </motion.p>
 
@@ -97,11 +83,12 @@ export default function Home() {
                 viewport={{ once: true, amount: 0.3 }}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-xl font-semibold">Report Generator</h3>
-                  <FileText className="text-primary h-6 w-6" />
+                  <h3 className="text-xl font-semibold">Recurring Events Manager</h3>
+                  <CalendarDays className="text-primary h-6 w-6" />
                 </div>
+
                 <p className="text-muted-foreground mb-6">
-                  Create detailed reports and valuable insights for your business.
+                  Create, visualize, and manage recurring schedules with flexible rules and a modern calendar UI.
                 </p>
 
                 <h4 className="font-medium mb-3">Highlights:</h4>
@@ -114,15 +101,10 @@ export default function Home() {
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 10V3L4 14h7v7l9-11h-7z"
-                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
-                    <span>Fast processing of large data sets for real-time reporting.</span>
+                    <span>Fast occurrence generation with interval, start date, and optional stop date.</span>
                   </li>
                   <li className="flex items-start">
                     <div className="bg-green-100 p-1 rounded mr-3 mt-0.5 dark:bg-green-900">
@@ -140,7 +122,7 @@ export default function Home() {
                         />
                       </svg>
                     </div>
-                    <span>Granular access control and log auditing to protect sensitive information.</span>
+                    <span>Inline edit, “cut from” deletion, and name filters — all in an accessible calendar.</span>
                   </li>
                 </ul>
               </motion.div>
@@ -157,7 +139,9 @@ export default function Home() {
                   <h3 className="text-xl font-semibold">Link Shortener</h3>
                   <Link2 className="text-primary h-6 w-6" />
                 </div>
-                <p className="text-muted-foreground mb-6">Simplify and track your links with our intuitive tool.</p>
+                <p className="text-muted-foreground mb-6">
+                  Simplify and track your links with our intuitive tool.
+                </p>
 
                 <h4 className="font-medium mb-3">Highlights:</h4>
                 <ul className="space-y-3">
@@ -169,12 +153,7 @@ export default function Home() {
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 10V3L4 14h7v7l9-11h-7z"
-                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
                     <span>Ultra-fast redirection for an uninterrupted user experience.</span>
@@ -203,8 +182,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-
     </div>
   )
 }
-
