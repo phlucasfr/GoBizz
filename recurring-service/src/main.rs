@@ -1,3 +1,4 @@
+use std::net::{Ipv6Addr, SocketAddr};
 use tonic::transport::Server;
 use tonic_health::server::health_reporter;
 
@@ -41,7 +42,7 @@ async fn main() -> anyhow::Result<()> {
         .set_serving::<EventsServer<EventsGrpc>>()
         .await;
 
-    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], cfg.port));
+    let addr: SocketAddr = SocketAddr::from((Ipv6Addr::UNSPECIFIED, cfg.port));
     tracing::info!("gRPC listening on {}", addr);
 
     Server::builder()
