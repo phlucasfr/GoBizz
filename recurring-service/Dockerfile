@@ -3,24 +3,19 @@
 FROM rust:bookworm AS base
 WORKDIR /app
 
-# Precisamos do nightly por causa do edition 2024
 RUN rustup toolchain install nightly && rustup default nightly
 
-# Sem protobuf-compiler aqui
 RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config libssl-dev ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# Cache de build de Rust
 RUN cargo +nightly install cargo-chef
 
-# ----------
 FROM base AS planner
 WORKDIR /app
 COPY . .
 RUN cargo +nightly chef prepare --recipe-path recipe.json
 
-# ----------
 FROM base AS builder
 WORKDIR /app
 
@@ -31,7 +26,6 @@ COPY . .
 ARG BIN_NAME=recurring-service
 RUN cargo +nightly build --release --locked --bin ${BIN_NAME}
 
-# ----------
 FROM debian:bookworm-slim AS runtime
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
