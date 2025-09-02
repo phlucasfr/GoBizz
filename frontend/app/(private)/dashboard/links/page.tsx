@@ -350,7 +350,7 @@ export default function LinksPage() {
               <div>
                 <Label htmlFor="custom-slug">Customize your link (optional)</Label>
                 <div className="flex items-center">
-                  <div className="bg-muted px-3 py-2 rounded-l-md border-y border-l">gobizz.co/</div>
+                  <div className="bg-muted px-3 py-2 rounded-l-md border-y border-l">gobizz.click/</div>
                   <Input
                     id="custom-slug"
                     className={`rounded-l-none ${customSlug && !validateCustomSlug(customSlug) ? "border-red-500" : ""}`}
@@ -708,7 +708,7 @@ export default function LinksPage() {
             <div>
               <Label htmlFor="edit-custom-slug">Custom Slug (optional)</Label>
               <div className="flex items-center">
-                <div className="bg-muted px-3 py-2 rounded-l-md border-y border-l">gobizz.co/</div>
+                <div className="bg-muted px-3 py-2 rounded-l-md border-y border-l">gobizz.click/</div>
                 <Input
                   id="edit-custom-slug"
                   className={`rounded-l-none ${editCustomSlug && !validateCustomSlug(editCustomSlug) ? "border-red-500" : ""}`}
