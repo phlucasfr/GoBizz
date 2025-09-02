@@ -1,22 +1,23 @@
 "use client"
 
 import React from "react"
-import { format, startOfMonth, endOfMonth } from "date-fns"
-import { LucideCalendar } from "lucide-react"
-
-import { EventForm } from "./components/EventForm"
-import { Calendar as EventCalendar } from "./components/Calendar"
+import { motion } from "framer-motion"
+import { Toaster } from "@/components/ui/toaster"
 import { Filters } from "./components/Filters"
+import { useToast } from "@/hooks/use-toast"
+import { EventForm } from "./components/EventForm"
 import { DeleteDialog } from "./components/DeleteDialog"
+import { LucideCalendar } from "lucide-react"
 import { EditEventDialog } from "./components/EditEventDialog"
 import { EventActionsPopover } from "./components/EventActionsPopover"
+import { Calendar as EventCalendar } from "./components/Calendar"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { useToast } from "@/hooks/use-toast"
-import { Toaster } from "@/components/ui/toaster"
 
 import { eventsApi } from "./services/api"
+import { EventsGrid } from "./components/EventsGrid"
 import { useDebounce } from "./hooks/useDebounce"
+
+import { format, startOfMonth, endOfMonth, parseISO } from "date-fns"
 import type { EventDTO, OccurrenceDTO, CreateEventPayload, UpdateEventPayload, ApiError } from "./types"
 
 function App() {
@@ -95,7 +96,7 @@ function App() {
       const response = await eventsApi.listOccurrences(
         { start, end, name: filter || undefined },
       )
-    
+
       setOccurrences(response.data?.occurrences ?? [])
     } catch (error: any) {
       if (error.name !== "AbortError") {
@@ -111,8 +112,8 @@ function App() {
   const loadEvents = React.useCallback(async () => {
     try {
       const response = await eventsApi.listEvents()
-      setEvents(response.data?.events ?? []) 
-      
+      setEvents(response.data?.events ?? [])
+
     } catch (error: any) {
       console.error("Error loading events:", error)
     }
@@ -163,34 +164,29 @@ function App() {
   }
 
   const handleDeleteConfirm = async (deleteType: "all" | "from") => {
-    if (!deleteDialog.selectedDate || deleteDialog.occurrences.length === 0) return
-
+    if (deleteDialog.occurrences.length === 0) return
     setLoadingDelete(true)
-
     try {
       const eventId = deleteDialog.occurrences[0].eventId
 
       if (deleteType === "all") {
         await eventsApi.deleteEvent(eventId)
       } else {
+        if (!deleteDialog.selectedDate) {
+          throw new Error("Select a date to delete from.")
+        }
         const fromDate = format(deleteDialog.selectedDate, "yyyy-MM-dd")
         await eventsApi.deleteEventFrom(eventId, fromDate)
       }
 
-      toast({
-        title: "Success",
-        description: "Event deleted successfully!",
-      })
-
+      toast({ title: "Success", description: "Event deleted successfully!" })
       setDeleteDialog({ open: false, occurrences: [], selectedDate: null })
-
-      // Reload data
       await Promise.all([loadOccurrences(currentMonth, debouncedNameFilter), loadEvents()])
     } catch (error: any) {
       const apiError = error.response?.data as ApiError
       toast({
         title: "Error",
-        description: apiError?.error || apiError?.message || "Error deleting event",
+        description: apiError?.error || apiError?.message || error.message || "Error deleting event",
         variant: "destructive",
       })
     } finally {
@@ -223,21 +219,40 @@ function App() {
     }
   }
 
+  const handleDeleteFromGrid = (eventId: string, suggestedDate?: string) => {
+    const occs = occurrences.filter((o) => o.eventId === eventId)
+
+    let selectedDate: Date | null = null
+    if (suggestedDate) {
+      selectedDate = parseISO(suggestedDate)
+    } else if (occs.length > 0) {
+      const firstDateInMonth = occs.reduce((min, o) => (o.date < min ? o.date : min), occs[0].date)
+      selectedDate = parseISO(firstDateInMonth)
+    }
+
+    setDeleteDialog({
+      open: true,
+      occurrences: occs,
+      selectedDate,
+    })
+  }
+
   const handleDeleteFromPopover = (eventId: string) => {
-    // Find the specific occurrence for this event
-    const specificOccurrence = eventActionsPopover.occurrences.find((occ) => occ.eventId === eventId)
+    const specificOccurrence = eventActionsPopover.occurrences.find(
+      (occ) => occ.eventId === eventId
+    )
     if (specificOccurrence) {
       setDeleteDialog({
         open: true,
-        occurrences: [specificOccurrence], // Only pass the specific occurrence
+        occurrences: [specificOccurrence],
         selectedDate: eventActionsPopover.selectedDate,
       })
     }
   }
 
-  const handleEditFromPopover = async (eventId: string) => {    
+  const handleEditFromPopover = async (eventId: string) => {
     const event = events.find((e) => e.id === eventId)
-    
+
     if (event) {
       setEditDialog({
         open: true,
@@ -248,22 +263,22 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Modern Header */}
-      <header className="glass-strong border-b sticky top-0 z-50">
+      <header className="glass-strong border-b fixed top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
                 <LucideCalendar className="h-6 w-6 text-primary" />
               </div>
-              <div>
+              <motion.div>
                 <h1 className="text-2xl font-bold font-space-grotesk">Event Manager</h1>
                 <p className="text-sm text-muted-foreground">Modern management of recurring events</p>
+              </motion.div>
+              <div>
+
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-            </div>
+
           </div>
         </div>
       </header>
@@ -275,7 +290,7 @@ function App() {
         </div>
       )}
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-20 md:pt-24 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Event Form */}
           <div className="lg:col-span-4">
@@ -293,6 +308,15 @@ function App() {
                 occurrences={occurrences}
                 onDayClick={handleDayClick}
                 loading={loadingOccurrences}
+              />
+
+              <EventsGrid
+                month={currentMonth}
+                occurrences={occurrences}
+                events={events}
+                loading={loadingOccurrences}
+                onEdit={handleEditFromPopover}
+                onDelete={handleDeleteFromGrid}
               />
 
               {occurrencesError && (
