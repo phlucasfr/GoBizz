@@ -11,6 +11,33 @@ import (
 	"go.uber.org/zap"
 )
 
+func clientIP(c *fiber.Ctx) string {
+	if ip := strings.TrimSpace(c.Get("CF-Connecting-IP")); ip != "" {
+		return normalizeIP(ip)
+	}
+
+	if xff := strings.TrimSpace(c.Get(fiber.HeaderXForwardedFor)); xff != "" {
+		parts := strings.Split(xff, ",")
+		if len(parts) > 0 {
+			return normalizeIP(strings.TrimSpace(parts[0]))
+		}
+	}
+
+	return normalizeIP(c.IP())
+}
+
+func clientUA(c *fiber.Ctx) string {
+	return strings.ToLower(strings.TrimSpace(c.Get("User-Agent")))
+}
+
+func normalizeIP(ip string) string {
+	// Normalize IPv6-mapped IPv4: ::ffff:1.2.3.4 -> 1.2.3.4
+	if strings.HasPrefix(ip, "::ffff:") && len(ip) > len("::ffff:") {
+		return strings.TrimPrefix(ip, "::ffff:")
+	}
+	return ip
+}
+
 // AuthMiddleware is a middleware function for the Fiber framework that handles
 // authentication and token validation. It performs the following tasks:
 //
@@ -46,7 +73,6 @@ func AuthMiddleware(rdb *redis.Client) fiber.Handler {
 				"error": "Authorization header is required",
 			})
 		}
-
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			logger.Log.Error("Invalid authorization header format")
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -77,13 +103,17 @@ func AuthMiddleware(rdb *redis.Client) fiber.Handler {
 			})
 		}
 
-		ip := c.Get("CF-Connecting-IP")
-		if ip == "" {
-			ip = c.IP()
-		}
-		ua := c.Get("User-Agent")
-		if utils.ComputeIpHash(ip, ua) != claims.IpHash {
-			logger.Log.Warn("IP/User-Agent mismatch on token", zap.String("ip", ip), zap.String("ua", ua))
+		ip := clientIP(c)
+		ua := clientUA(c)
+
+		calculated := utils.ComputeIpHash(ip, ua)
+		if calculated != claims.IpHash {
+			logger.Log.Warn("IP/User-Agent mismatch on token",
+				zap.String("ip", ip),
+				zap.String("ua", ua),
+				zap.String("calc_hash", calculated),
+				zap.String("claim_hash", claims.IpHash),
+			)
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Invalid token context",
 			})
